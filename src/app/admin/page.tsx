@@ -1,10 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_URL } from '@/lib/api';
 import { type ImagePayload } from '@/lib/files';
+import { type MenuItem, type MenuSection } from '@/lib/menu-data';
 import PhotoUpload from '@/components/photo-upload';
+import MenuBoard from '@/components/menu-board';
+import MenuFooter from '@/components/menu-footer';
 
 interface ItemRow {
   id: string;
@@ -94,6 +97,61 @@ export default function AdminPage() {
     }
     return Array.from(map.entries());
   }, [items]);
+
+  // What the TV actually shows: active items only, grouped the same way the
+  // public screen pages do. Rendered off-screen (see exportRef below) using
+  // the exact same MenuBoard/MenuFooter components, so the exported image
+  // matches the live screen exactly rather than being a lookalike.
+  const exportSections = useMemo<MenuSection[]>(() => {
+    const map = new Map<string, MenuItem[]>();
+    for (const row of items) {
+      if (!row.active) continue;
+      const item: MenuItem = {
+        id: row.id,
+        screen: row.screen,
+        section: row.section,
+        sectionOrder: row.section_order,
+        name: row.name,
+        description: row.description,
+        hotIced: row.hot_iced,
+        price: row.price,
+        imageUrl: row.image_url,
+        sortOrder: row.sort_order,
+      };
+      if (!map.has(row.section)) map.set(row.section, []);
+      map.get(row.section)!.push(item);
+    }
+    return Array.from(map.entries()).map(([name, sectionItems]) => ({ name, items: sectionItems }));
+  }, [items]);
+
+  const exportRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+
+  async function handleExportImage() {
+    if (!exportRef.current) return;
+    setExporting(true);
+    setExportError('');
+    try {
+      // Loaded dynamically — html2canvas touches the DOM at import time in
+      // some bundles, which would break the static-export build if it were
+      // a top-level import.
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(exportRef.current, {
+        backgroundColor: '#100C08',
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/jpeg', 0.92);
+      link.download = `18g-menu-screen-${screen}.jpg`;
+      link.click();
+    } catch {
+      setExportError('Could not export the image. If any items have photos, the storage account may need CORS enabled for this site.');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -208,16 +266,32 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <div style={styles.tabs}>
-        {[1, 2].map((s) => (
-          <button
-            key={s}
-            style={{ ...styles.tab, ...(screen === s ? styles.tabActive : {}) }}
-            onClick={() => setScreen(s as 1 | 2)}
-          >
-            Screen {s}
-          </button>
-        ))}
+      <div style={styles.tabsRow}>
+        <div style={styles.tabs}>
+          {[1, 2].map((s) => (
+            <button
+              key={s}
+              style={{ ...styles.tab, ...(screen === s ? styles.tabActive : {}) }}
+              onClick={() => setScreen(s as 1 | 2)}
+            >
+              Screen {s}
+            </button>
+          ))}
+        </div>
+        <button type="button" onClick={handleExportImage} disabled={exporting} style={styles.exportBtn}>
+          {exporting ? 'Exporting…' : `⬇ Export Screen ${screen} Image`}
+        </button>
+      </div>
+      {exportError && <p style={styles.errorText}>{exportError}</p>}
+
+      {/* Rendered off-screen with the real MenuBoard/MenuFooter components so
+          the exported JPEG is pixel-identical to the live screen — never
+          shown, only captured by html2canvas above. */}
+      <div style={styles.exportCanvasWrap} aria-hidden="true">
+        <div ref={exportRef} style={styles.exportCanvas}>
+          <MenuBoard sections={exportSections} />
+          <MenuFooter />
+        </div>
       </div>
 
       <form style={styles.addForm} onSubmit={handleCreate}>
@@ -406,10 +480,43 @@ const styles: Record<string, React.CSSProperties> = {
     textTransform: 'uppercase',
     cursor: 'pointer',
   },
+  tabsRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 8,
+  },
   tabs: {
     display: 'flex',
     gap: 12,
-    marginBottom: 24,
+  },
+  exportBtn: {
+    backgroundColor: 'rgba(201,168,76,0.12)',
+    border: '1px solid rgba(201,168,76,0.4)',
+    borderRadius: 6,
+    padding: '8px 16px',
+    color: '#C9A84C',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: '0.5px',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  },
+  exportCanvasWrap: {
+    position: 'absolute',
+    left: -9999,
+    top: 0,
+    overflow: 'hidden',
+    width: 1,
+    height: 1,
+  },
+  exportCanvas: {
+    width: 900,
+    backgroundColor: '#100C08',
+    padding: 'clamp(28px, 4vw, 56px)',
   },
   tab: {
     backgroundColor: 'transparent',
