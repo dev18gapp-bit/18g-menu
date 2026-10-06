@@ -1,0 +1,25 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+:root {
+  --font-playfair: 'Playfair Display', serif;
+  --font-raleway: 'Raleway', sans-serif;
+
+  --coffee-ground: #100C08;
+  --coffee-ground-raised: #1A1611;
+  --coffee-cream: #F5ECD7;
+  --coffee-cream-dim: rgba(245, 236, 215, 0.55);
+  --coffee-gold: #C9A84C;
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
