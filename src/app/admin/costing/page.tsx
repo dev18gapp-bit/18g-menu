@@ -9,19 +9,34 @@ interface ItemRow {
   id: string;
   screen: number;
   section: string;
+  item_type: string;
   name: string;
   price: number | null;
-  food_cost: number | null;
-  other_cost: number | null;
+  bean_cost: number | null;
+  milk_cost: number | null;
+  foam_cost: number | null;
+  syrup_cost: number | null;
+  packaging_cup_cost: number | null;
+  packaging_straw_cost: number | null;
 }
+
+const COST_COLUMNS: { key: keyof ItemRow; patchKey: string; label: string }[] = [
+  { key: 'bean_cost', patchKey: 'beanCost', label: 'Bean' },
+  { key: 'milk_cost', patchKey: 'milkCost', label: 'Milk' },
+  { key: 'foam_cost', patchKey: 'foamCost', label: 'Foam' },
+  { key: 'syrup_cost', patchKey: 'syrupCost', label: 'Syrup' },
+  { key: 'packaging_cup_cost', patchKey: 'packagingCupCost', label: 'Cup' },
+  { key: 'packaging_straw_cost', patchKey: 'packagingStrawCost', label: 'Straw' },
+];
 
 function money(v: number | null): string {
   return v === null ? '—' : `$${v.toFixed(2)}`;
 }
 
 function totalCost(row: ItemRow): number | null {
-  if (row.food_cost === null && row.other_cost === null) return null;
-  return (row.food_cost ?? 0) + (row.other_cost ?? 0);
+  const values = COST_COLUMNS.map((c) => row[c.key] as number | null);
+  if (values.every((v) => v === null)) return null;
+  return values.reduce((sum: number, v) => sum + (v ?? 0), 0);
 }
 
 function costPercent(row: ItemRow): string {
@@ -36,7 +51,7 @@ function margin(row: ItemRow): string {
   return money(row.price - cost);
 }
 
-export default function CostingPage() {
+export default function DrinkCostingPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [items, setItems] = useState<ItemRow[]>([]);
@@ -69,7 +84,8 @@ export default function CostingPage() {
           router.push('/admin/login');
           return;
         }
-        setItems(await res.json());
+        const data: ItemRow[] = await res.json();
+        setItems(data.filter((i) => i.item_type === 'drink'));
       } catch {
         setError('Could not load items — check your connection and try again.');
       } finally {
@@ -133,13 +149,16 @@ export default function CostingPage() {
     <main style={styles.page}>
       <div style={styles.header}>
         <div>
-          <p style={styles.label}>MENU ADMIN — COSTING</p>
+          <p style={styles.label}>MENU ADMIN — DRINK COSTING</p>
           <div style={styles.divider} />
           <nav style={styles.nav}>
             <Link href="/admin" style={styles.navLink}>
               Menu
             </Link>
-            <span style={styles.navLinkActive}>Costing</span>
+            <span style={styles.navLinkActive}>Drink Costing</span>
+            <Link href="/admin/costing/food" style={styles.navLink}>
+              Food Costing
+            </Link>
           </nav>
         </div>
         <button style={styles.signOutBtn} onClick={signOut}>
@@ -151,28 +170,31 @@ export default function CostingPage() {
 
       {avgCostPercent && (
         <p style={styles.summary}>
-          Average cost across priced items: <span style={styles.summaryValue}>{avgCostPercent}%</span> of menu price
+          Average cost across priced drinks: <span style={styles.summaryValue}>{avgCostPercent}%</span> of menu price
         </p>
       )}
 
       {loading ? (
         <p style={styles.emptyText}>Loading…</p>
       ) : items.length === 0 ? (
-        <p style={styles.emptyText}>No menu items yet — add some on the Menu page first.</p>
+        <p style={styles.emptyText}>No drink items yet — add some on the Menu page first.</p>
       ) : (
         <div style={styles.sectionList}>
           {sections.map(([sectionLabel, sectionItems]) => (
             <div key={sectionLabel}>
               <p style={styles.sectionHeading}>{sectionLabel}</p>
-              <div className="table-scroll" style={styles.tableScroll}>
+              <div style={styles.tableScroll}>
                 <table style={styles.table}>
                   <thead>
                     <tr>
                       <th style={styles.th}>Item</th>
                       <th style={styles.th}>Price</th>
-                      <th style={styles.th}>Food Cost</th>
-                      <th style={styles.th}>Other Cost</th>
-                      <th style={styles.th}>Total Cost</th>
+                      {COST_COLUMNS.map((c) => (
+                        <th key={c.key} style={styles.th}>
+                          {c.label}
+                        </th>
+                      ))}
+                      <th style={styles.th}>Total</th>
                       <th style={styles.th}>Cost %</th>
                       <th style={styles.th}>Margin</th>
                     </tr>
@@ -182,34 +204,22 @@ export default function CostingPage() {
                       <tr key={item.id} style={{ opacity: busyId === item.id ? 0.5 : 1 }}>
                         <td style={styles.tdName}>{item.name}</td>
                         <td style={styles.td}>{money(item.price)}</td>
-                        <td style={styles.td}>
-                          <input
-                            type="number"
-                            step="0.01"
-                            style={styles.input}
-                            defaultValue={item.food_cost ?? ''}
-                            placeholder="—"
-                            onBlur={(e) => {
-                              const v = e.target.value.trim();
-                              const next = v === '' ? null : Number(v);
-                              if (next !== item.food_cost) patchCost(item.id, { foodCost: next });
-                            }}
-                          />
-                        </td>
-                        <td style={styles.td}>
-                          <input
-                            type="number"
-                            step="0.01"
-                            style={styles.input}
-                            defaultValue={item.other_cost ?? ''}
-                            placeholder="—"
-                            onBlur={(e) => {
-                              const v = e.target.value.trim();
-                              const next = v === '' ? null : Number(v);
-                              if (next !== item.other_cost) patchCost(item.id, { otherCost: next });
-                            }}
-                          />
-                        </td>
+                        {COST_COLUMNS.map((c) => (
+                          <td key={c.key} style={styles.td}>
+                            <input
+                              type="number"
+                              step="0.01"
+                              style={styles.input}
+                              defaultValue={(item[c.key] as number | null) ?? ''}
+                              placeholder="—"
+                              onBlur={(e) => {
+                                const v = e.target.value.trim();
+                                const next = v === '' ? null : Number(v);
+                                if (next !== item[c.key]) patchCost(item.id, { [c.patchKey]: next });
+                              }}
+                            />
+                          </td>
+                        ))}
                         <td style={styles.tdComputed}>{money(totalCost(item))}</td>
                         <td style={styles.tdComputed}>{costPercent(item)}</td>
                         <td style={styles.tdComputed}>{margin(item)}</td>
@@ -328,11 +338,11 @@ const styles: Record<string, React.CSSProperties> = {
   table: {
     borderCollapse: 'collapse',
     width: '100%',
-    minWidth: 680,
+    minWidth: 860,
   },
   th: {
     textAlign: 'left',
-    padding: '10px 14px',
+    padding: '10px 12px',
     fontFamily: 'var(--font-raleway)',
     fontSize: 11,
     fontWeight: 700,
@@ -343,7 +353,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   td: {
-    padding: '8px 14px',
+    padding: '8px 12px',
     fontFamily: 'var(--font-raleway)',
     fontSize: 13,
     color: '#F5ECD7',
@@ -351,7 +361,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   tdName: {
-    padding: '8px 14px',
+    padding: '8px 12px',
     fontFamily: 'var(--font-raleway)',
     fontSize: 13,
     fontWeight: 600,
@@ -360,7 +370,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   tdComputed: {
-    padding: '8px 14px',
+    padding: '8px 12px',
     fontFamily: 'var(--font-raleway)',
     fontSize: 13,
     fontWeight: 700,
@@ -369,11 +379,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   input: {
-    width: 80,
+    width: 68,
     backgroundColor: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(201,168,76,0.25)',
     borderRadius: 4,
-    padding: '5px 8px',
+    padding: '5px 6px',
     color: '#F5ECD7',
     fontFamily: 'var(--font-raleway)',
     fontSize: 13,

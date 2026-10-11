@@ -19,6 +19,7 @@ interface ItemRow {
   description: string;
   hot_iced: string;
   price: number | null;
+  item_type: string;
   image_url: string | null;
   sort_order: number;
   active: boolean;
@@ -47,6 +48,7 @@ export default function AdminPage() {
   const [newDescription, setNewDescription] = useState('');
   const [newHotIced, setNewHotIced] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [newItemType, setNewItemType] = useState<'drink' | 'food'>('drink');
   const [newImage, setNewImage] = useState<ImagePayload | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -173,6 +175,7 @@ export default function AdminPage() {
           description: newDescription.trim(),
           hotIced: newHotIced.trim(),
           price: newPrice.trim() === '' ? null : Number(newPrice),
+          itemType: newItemType,
           sortOrder: sectionItems.length,
           ...(newImage ? { image: newImage } : {}),
         }),
@@ -181,6 +184,7 @@ export default function AdminPage() {
       setNewDescription('');
       setNewHotIced('');
       setNewPrice('');
+      setNewItemType('drink');
       setNewImage(null);
       await load(token, screen);
     } finally {
@@ -264,7 +268,10 @@ export default function AdminPage() {
           <nav style={styles.nav}>
             <span style={styles.navLinkActive}>Menu</span>
             <Link href="/admin/costing" style={styles.navLink}>
-              Costing
+              Drink Costing
+            </Link>
+            <Link href="/admin/costing/food" style={styles.navLink}>
+              Food Costing
             </Link>
           </nav>
         </div>
@@ -335,6 +342,14 @@ export default function AdminPage() {
             value={newPrice}
             onChange={(e) => setNewPrice(e.target.value)}
           />
+          <select
+            style={{ ...styles.addInput, maxWidth: 110 }}
+            value={newItemType}
+            onChange={(e) => setNewItemType(e.target.value as 'drink' | 'food')}
+          >
+            <option value="drink">Drink</option>
+            <option value="food">Food</option>
+          </select>
         </div>
         <div style={styles.addFormRow}>
           <input
@@ -424,6 +439,15 @@ export default function AdminPage() {
                         }}
                       />
                     </div>
+
+                    <select
+                      style={styles.typeSelect}
+                      value={item.item_type}
+                      onChange={(e) => patchItem(item.id, { itemType: e.target.value })}
+                    >
+                      <option value="drink">Drink</option>
+                      <option value="food">Food</option>
+                    </select>
 
                     <label style={styles.activeToggle}>
                       <input
@@ -689,6 +713,16 @@ const styles: Record<string, React.CSSProperties> = {
     flex: '0 1 90px',
     minWidth: 80,
     fontVariantNumeric: 'tabular-nums',
+  },
+  typeSelect: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(201,168,76,0.25)',
+    borderRadius: 4,
+    padding: '5px 8px',
+    color: 'rgba(245,236,215,0.7)',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 11,
+    fontWeight: 600,
   },
   activeToggle: {
     display: 'flex',
