@@ -121,10 +121,12 @@ export default function GraphicsPage() {
         <div style={styles.tip}>
           <p style={styles.tipTitle}>Designing this in Canva</p>
           <p style={styles.tipCopy}>
-            Widescreen — use <b>1920×1080px</b> (or whatever your TV&apos;s resolution is) so it fills the screen without
-            stretching. This sits <b>behind</b> the menu text with a dark overlay automatically applied on top for
-            readability, so keep the busiest parts of your design toward the edges — the center, where the menu list
-            sits, will be dimmed.
+            These TVs are mounted <b>vertically</b> — export in portrait, <b>1080×1920px</b> (or whatever your TV&apos;s
+            actual resolution is, tall side up) so it fills the screen without stretching. A landscape/widescreen
+            export will get heavily cropped on the sides, so don&apos;t reuse a 1920×1080 design here. This sits
+            <b> behind</b> the menu text with a dark overlay on top for readability, so keep the busiest parts of
+            your design toward the top and bottom edges — the vertical center, where the menu list sits, will be
+            dimmed.
           </p>
         </div>
         <div style={styles.bgCard}>
@@ -229,8 +231,8 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: 640,
   },
   bgPreviewWrap: {
-    aspectRatio: '16 / 9',
-    maxWidth: 480,
+    aspectRatio: '9 / 16',
+    maxWidth: 270,
     borderRadius: 10,
     border: '1px solid rgba(245,236,215,0.12)',
     backgroundColor: 'rgba(255,255,255,0.03)',
