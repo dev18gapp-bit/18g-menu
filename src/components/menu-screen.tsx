@@ -45,16 +45,10 @@ export default function MenuScreen({ screen }: { screen: number }) {
     <main style={pageStyle}>
       {graphics.background && <div style={styles.scrim} />}
       <div style={styles.content}>
-        {graphics.header && (
-          <div style={styles.headerFlourish}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={graphics.header} alt="" style={styles.headerImage} />
-          </div>
-        )}
         {loaded && sections.length === 0 ? (
           <p style={styles.emptyText}>Menu coming soon.</p>
         ) : (
-          <MenuBoard sections={sections} graphics={graphics} />
+          <MenuBoard sections={sections} />
         )}
         <MenuFooter />
       </div>
@@ -83,19 +77,6 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'relative',
     width: '100%',
     maxWidth: 900,
-  },
-  headerFlourish: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: 28,
-  },
-  headerImage: {
-    width: 72,
-    height: 72,
-    objectFit: 'contain',
-    // See MenuBoard's sectionIcon comment — works for both a true
-    // transparent PNG and a solid-black-background Canva-free export.
-    mixBlendMode: 'screen',
   },
   emptyText: {
     color: 'rgba(245,236,215,0.4)',

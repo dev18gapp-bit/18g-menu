@@ -1,17 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { API_URL } from '@/lib/api';
 import { type ImagePayload } from '@/lib/files';
 import PhotoUpload from '@/components/photo-upload';
-
-interface ItemRow {
-  screen: number;
-  section: string;
-  section_order: number;
-}
 
 interface GraphicRow {
   slot: string;
@@ -21,9 +15,7 @@ interface GraphicRow {
 export default function GraphicsPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [sectionSlots, setSectionSlots] = useState<string[]>([]);
   const [graphics, setGraphics] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
   const [busySlot, setBusySlot] = useState<string | null>(null);
   const [error, setError] = useState('');
 
@@ -41,30 +33,16 @@ export default function GraphicsPage() {
 
   const load = useCallback(
     async (activeToken: string) => {
-      setLoading(true);
       setError('');
       try {
-        const [itemsRes, graphicsRes] = await Promise.all([
-          fetch(`${API_URL}/menu-admin/items`, { headers: { Authorization: `Bearer ${activeToken}` } }),
-          fetch(`${API_URL}/menu-admin/graphics`, { headers: { Authorization: `Bearer ${activeToken}` } }),
-        ]);
-        if (itemsRes.status === 401 || graphicsRes.status === 401) {
+        const graphicsRes = await fetch(`${API_URL}/menu-admin/graphics`, {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+        if (graphicsRes.status === 401) {
           localStorage.removeItem('menuAdminToken');
           router.push('/admin/login');
           return;
         }
-
-        const items: ItemRow[] = await itemsRes.json();
-        const seen = new Map<string, number>(); // section -> (screen * 1000 + section_order), for stable ordering
-        for (const item of items) {
-          const key = item.section;
-          const order = item.screen * 1000 + item.section_order;
-          if (!seen.has(key) || seen.get(key)! > order) seen.set(key, order);
-        }
-        const sections = Array.from(seen.entries())
-          .sort((a, b) => a[1] - b[1])
-          .map(([name]) => name);
-        setSectionSlots(sections);
 
         const graphicsList: GraphicRow[] = await graphicsRes.json();
         const map: Record<string, string> = {};
@@ -74,8 +52,6 @@ export default function GraphicsPage() {
         setGraphics(map);
       } catch {
         setError('Could not load graphics — check your connection and try again.');
-      } finally {
-        setLoading(false);
       }
     },
     [router]
@@ -111,8 +87,6 @@ export default function GraphicsPage() {
     localStorage.removeItem('menuAdminToken');
     router.push('/admin/login');
   }
-
-  const slots = useMemo(() => [{ id: 'header', label: 'Header (shown once, top of both screens)' }, ...sectionSlots.map((s) => ({ id: s, label: s }))], [sectionSlots]);
 
   if (!token) return null;
 
@@ -171,43 +145,6 @@ export default function GraphicsPage() {
             onError={setError}
           />
         </div>
-      </section>
-
-      <section>
-        <p style={styles.sectionHeading}>Header &amp; Section Icons</p>
-        <div style={styles.tip}>
-          <p style={styles.tipTitle}>Designing these in Canva</p>
-          <p style={styles.tipCopy}>
-            Roughly square, ~400×400px. If you&apos;re not on Canva Pro, transparent PNG export isn&apos;t available — instead,
-            design the icon in gold/cream line art on a <b>solid black</b> background and export as a normal PNG. The
-            screens blend the black away automatically, so it looks the same either way.
-          </p>
-        </div>
-
-        {loading ? (
-          <p style={styles.emptyText}>Loading…</p>
-        ) : (
-          <div style={styles.grid}>
-            {slots.map((slot) => (
-              <div key={slot.id} style={styles.card}>
-                <p style={styles.cardLabel}>{slot.label}</p>
-                <div style={styles.previewWrap}>
-                  {graphics[slot.id] && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={graphics[slot.id]} alt="" style={styles.preview} />
-                  )}
-                </div>
-                <PhotoUpload
-                  imageUrl={graphics[slot.id]}
-                  busy={busySlot === slot.id}
-                  size={56}
-                  onUpload={(image) => uploadGraphic(slot.id, image)}
-                  onError={setError}
-                />
-              </div>
-            ))}
-          </div>
-        )}
       </section>
     </main>
   );
@@ -335,43 +272,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13,
     lineHeight: 1.6,
   },
-  emptyText: {
-    color: 'rgba(245,236,215,0.4)',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 14,
-  },
   errorText: {
     color: '#E5A15C',
     fontFamily: 'var(--font-raleway)',
     fontSize: 13,
     marginBottom: 16,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: 16,
-    maxWidth: 960,
-  },
-  card: {
-    border: '1px solid rgba(245,236,215,0.12)',
-    borderRadius: 10,
-    padding: '16px 18px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-  },
-  cardLabel: {
-    color: '#F5ECD7',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 13,
-    fontWeight: 700,
-  },
-  previewWrap: {
-    minHeight: 4,
-  },
-  preview: {
-    maxWidth: 120,
-    maxHeight: 120,
-    objectFit: 'contain',
   },
 };

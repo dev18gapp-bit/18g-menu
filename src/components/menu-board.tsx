@@ -2,20 +2,14 @@ import { formatPrice, type MenuSection } from '@/lib/menu-data';
 
 interface MenuBoardProps {
   sections: MenuSection[];
-  /** Admin-uploaded graphics keyed by slot — section name here, 'header' used by MenuScreen. */
-  graphics?: Record<string, string>;
 }
 
-export default function MenuBoard({ sections, graphics = {} }: MenuBoardProps) {
+export default function MenuBoard({ sections }: MenuBoardProps) {
   return (
     <div style={styles.board}>
       {sections.map((section) => (
         <section key={section.name} style={styles.section}>
           <div style={styles.sectionHead}>
-            {graphics[section.name] && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={graphics[section.name]} alt="" style={styles.sectionIcon} />
-            )}
             <h2 style={styles.sectionTitle}>{section.name}</h2>
             <div style={styles.sectionRule} />
           </div>
@@ -56,19 +50,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionHead: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'baseline',
     gap: 10,
     marginBottom: 18,
-  },
-  sectionIcon: {
-    width: 30,
-    height: 30,
-    objectFit: 'contain',
-    // Works whether the uploaded PNG has a real transparent background or
-    // (the Canva-free workaround) a solid black one — on our near-black
-    // page background, screen-blending a black fill makes it disappear
-    // while leaving light line-art colors essentially unchanged.
-    mixBlendMode: 'screen',
   },
   sectionTitle: {
     color: '#C9A84C',
