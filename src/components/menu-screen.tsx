@@ -32,8 +32,18 @@ export default function MenuScreen({ screen }: { screen: number }) {
     };
   }, [screen]);
 
+  const pageStyle: React.CSSProperties = graphics.background
+    ? {
+        ...styles.page,
+        backgroundImage: `url(${graphics.background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : styles.page;
+
   return (
-    <main style={styles.page}>
+    <main style={pageStyle}>
+      {graphics.background && <div style={styles.scrim} />}
       <div style={styles.content}>
         {graphics.header && (
           <div style={styles.headerFlourish}>
@@ -54,6 +64,7 @@ export default function MenuScreen({ screen }: { screen: number }) {
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
+    position: 'relative',
     minHeight: '100vh',
     width: '100%',
     backgroundColor: '#100C08',
@@ -61,7 +72,15 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     padding: 'clamp(28px, 4vw, 56px)',
   },
+  // Sits between the background image and the content so menu text stays
+  // legible no matter what's in the uploaded design.
+  scrim: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(16,12,8,0.72)',
+  },
   content: {
+    position: 'relative',
     width: '100%',
     maxWidth: 900,
   },

@@ -140,41 +140,75 @@ export default function GraphicsPage() {
         </button>
       </div>
 
-      <div style={styles.tip}>
-        <p style={styles.tipTitle}>Designing these in Canva</p>
-        <p style={styles.tipCopy}>
-          Roughly square, ~400×400px. If you&apos;re not on Canva Pro, transparent PNG export isn&apos;t available — instead,
-          design the icon in gold/cream line art on a <b>solid black</b> background and export as a normal PNG. The
-          screens blend the black away automatically, so it looks the same either way.
-        </p>
-      </div>
-
       {error && <p style={styles.errorText}>{error}</p>}
 
-      {loading ? (
-        <p style={styles.emptyText}>Loading…</p>
-      ) : (
-        <div style={styles.grid}>
-          {slots.map((slot) => (
-            <div key={slot.id} style={styles.card}>
-              <p style={styles.cardLabel}>{slot.label}</p>
-              <div style={styles.previewWrap}>
-                {graphics[slot.id] && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={graphics[slot.id]} alt="" style={styles.preview} />
-                )}
-              </div>
-              <PhotoUpload
-                imageUrl={graphics[slot.id]}
-                busy={busySlot === slot.id}
-                size={56}
-                onUpload={(image) => uploadGraphic(slot.id, image)}
-                onError={setError}
-              />
-            </div>
-          ))}
+      <section style={styles.bgSection}>
+        <p style={styles.sectionHeading}>Background</p>
+        <div style={styles.tip}>
+          <p style={styles.tipTitle}>Designing this in Canva</p>
+          <p style={styles.tipCopy}>
+            Widescreen — use <b>1920×1080px</b> (or whatever your TV&apos;s resolution is) so it fills the screen without
+            stretching. This sits <b>behind</b> the menu text with a dark overlay automatically applied on top for
+            readability, so keep the busiest parts of your design toward the edges — the center, where the menu list
+            sits, will be dimmed.
+          </p>
         </div>
-      )}
+        <div style={styles.bgCard}>
+          <div style={styles.bgPreviewWrap}>
+            {graphics.background ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={graphics.background} alt="" style={styles.bgPreview} />
+            ) : (
+              <span style={styles.bgPreviewEmpty}>No background set</span>
+            )}
+          </div>
+          <PhotoUpload
+            imageUrl={graphics.background}
+            busy={busySlot === 'background'}
+            size={56}
+            label="Background"
+            onUpload={(image) => uploadGraphic('background', image)}
+            onError={setError}
+          />
+        </div>
+      </section>
+
+      <section>
+        <p style={styles.sectionHeading}>Header &amp; Section Icons</p>
+        <div style={styles.tip}>
+          <p style={styles.tipTitle}>Designing these in Canva</p>
+          <p style={styles.tipCopy}>
+            Roughly square, ~400×400px. If you&apos;re not on Canva Pro, transparent PNG export isn&apos;t available — instead,
+            design the icon in gold/cream line art on a <b>solid black</b> background and export as a normal PNG. The
+            screens blend the black away automatically, so it looks the same either way.
+          </p>
+        </div>
+
+        {loading ? (
+          <p style={styles.emptyText}>Loading…</p>
+        ) : (
+          <div style={styles.grid}>
+            {slots.map((slot) => (
+              <div key={slot.id} style={styles.card}>
+                <p style={styles.cardLabel}>{slot.label}</p>
+                <div style={styles.previewWrap}>
+                  {graphics[slot.id] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={graphics[slot.id]} alt="" style={styles.preview} />
+                  )}
+                </div>
+                <PhotoUpload
+                  imageUrl={graphics[slot.id]}
+                  busy={busySlot === slot.id}
+                  size={56}
+                  onUpload={(image) => uploadGraphic(slot.id, image)}
+                  onError={setError}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
@@ -238,6 +272,45 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: '1px',
     textTransform: 'uppercase',
     cursor: 'pointer',
+  },
+  bgSection: {
+    marginBottom: 40,
+  },
+  sectionHeading: {
+    color: '#F5ECD7',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 13,
+    fontWeight: 700,
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+    marginBottom: 12,
+  },
+  bgCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+    maxWidth: 640,
+  },
+  bgPreviewWrap: {
+    aspectRatio: '16 / 9',
+    maxWidth: 480,
+    borderRadius: 10,
+    border: '1px solid rgba(245,236,215,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  bgPreview: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  bgPreviewEmpty: {
+    color: 'rgba(245,236,215,0.3)',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 12,
   },
   tip: {
     maxWidth: 640,
