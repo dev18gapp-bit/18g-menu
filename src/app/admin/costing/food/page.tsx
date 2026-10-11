@@ -166,6 +166,9 @@ export default function FoodCostingPage() {
               Drink Costing
             </Link>
             <span style={styles.navLinkActive}>Food Costing</span>
+            <Link href="/admin/graphics" style={styles.navLink}>
+              Graphics
+            </Link>
           </nav>
         </div>
         <button style={styles.signOutBtn} onClick={signOut}>

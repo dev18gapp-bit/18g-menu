@@ -273,6 +273,9 @@ export default function AdminPage() {
             <Link href="/admin/costing/food" style={styles.navLink}>
               Food Costing
             </Link>
+            <Link href="/admin/graphics" style={styles.navLink}>
+              Graphics
+            </Link>
           </nav>
         </div>
         <button style={styles.signOutBtn} onClick={signOut}>

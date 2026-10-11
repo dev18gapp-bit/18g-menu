@@ -80,3 +80,19 @@ export function groupByScreen(items: MenuItem[], screen: number): MenuSection[] 
 export function formatPrice(price: number | null): string {
   return price === null ? '—' : `$${price.toFixed(2)}`;
 }
+
+/**
+ * Admin-uploaded graphics keyed by slot ('header', or an exact section
+ * name). Returns {} on any failure — the board renders with no icons
+ * rather than crashing.
+ */
+export async function fetchMenuGraphics(): Promise<Record<string, string>> {
+  try {
+    const res = await fetch(`${API_URL}/menu-graphics`);
+    if (!res.ok) return {};
+    const data = await res.json();
+    return typeof data === 'object' && data !== null ? data : {};
+  } catch {
+    return {};
+  }
+}
