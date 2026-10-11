@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { API_URL } from '@/lib/api';
 import { type ImagePayload } from '@/lib/files';
 import { type MenuItem, type MenuSection } from '@/lib/menu-data';
@@ -260,6 +261,12 @@ export default function AdminPage() {
         <div>
           <p style={styles.label}>MENU ADMIN</p>
           <div style={styles.divider} />
+          <nav style={styles.nav}>
+            <span style={styles.navLinkActive}>Menu</span>
+            <Link href="/admin/costing" style={styles.navLink}>
+              Costing
+            </Link>
+          </nav>
         </div>
         <button style={styles.signOutBtn} onClick={signOut}>
           Sign Out
@@ -466,6 +473,26 @@ const styles: Record<string, React.CSSProperties> = {
     height: 1,
     backgroundColor: '#C9A84C',
     opacity: 0.6,
+    marginBottom: 14,
+  },
+  nav: {
+    display: 'flex',
+    gap: 16,
+  },
+  navLink: {
+    color: 'rgba(245,236,215,0.5)',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+    textDecoration: 'none',
+  },
+  navLinkActive: {
+    color: '#C9A84C',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 12,
+    fontWeight: 700,
+    letterSpacing: '0.5px',
   },
   signOutBtn: {
     backgroundColor: 'transparent',
