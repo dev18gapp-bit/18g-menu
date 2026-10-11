@@ -41,10 +41,12 @@ export default function MenuScreen({ screen }: { screen: number }) {
       }
     : styles.page;
 
+  const contentStyle: React.CSSProperties = graphics.background ? { ...styles.content, ...styles.contentPanel } : styles.content;
+
   return (
     <main style={pageStyle}>
       {graphics.background && <div style={styles.scrim} />}
-      <div style={styles.content}>
+      <div style={contentStyle}>
         {loaded && sections.length === 0 ? (
           <p style={styles.emptyText}>Menu coming soon.</p>
         ) : (
@@ -67,16 +69,26 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 'clamp(28px, 4vw, 56px)',
   },
   // Sits between the background image and the content so menu text stays
-  // legible no matter what's in the uploaded design.
+  // legible no matter what's in the uploaded design. Kept light so the
+  // background's true color still reads through — just enough to lift
+  // text contrast, not enough to wash a light design out to near-black.
   scrim: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(16,12,8,0.72)',
+    backgroundColor: 'rgba(16,12,8,0.35)',
   },
   content: {
     position: 'relative',
     width: '100%',
     maxWidth: 900,
+  },
+  // Guarantees text contrast over a background image regardless of how
+  // light the uploaded design is — the scrim alone isn't enough once it's
+  // kept subtle enough to preserve the background's true color.
+  contentPanel: {
+    backgroundColor: 'rgba(16,12,8,0.55)',
+    borderRadius: 16,
+    padding: 'clamp(20px, 3vw, 40px)',
   },
   emptyText: {
     color: 'rgba(245,236,215,0.4)',
