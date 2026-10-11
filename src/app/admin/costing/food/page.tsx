@@ -49,6 +49,15 @@ function margin(row: ItemRow): string {
   return money(row.price - cost);
 }
 
+// Classic "4x cost" rule of thumb (targets a 25% cost) — a suggested price
+// to compare against the actual, hardcoded menu price. Never saved or sent
+// to the screens; purely derived here for reference.
+function suggestedPrice(row: ItemRow): string {
+  const cost = totalCost(row);
+  if (cost === null) return '—';
+  return money(cost * 4);
+}
+
 export default function FoodCostingPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
@@ -192,7 +201,8 @@ export default function FoodCostingPage() {
                           {c.label}
                         </th>
                       ))}
-                      <th style={styles.th}>Total</th>
+                      <th style={styles.th}>Total Cost</th>
+                      <th style={styles.th}>Suggested Price (4x)</th>
                       <th style={styles.th}>Cost %</th>
                       <th style={styles.th}>Margin</th>
                     </tr>
@@ -219,6 +229,7 @@ export default function FoodCostingPage() {
                           </td>
                         ))}
                         <td style={styles.tdComputed}>{money(totalCost(item))}</td>
+                        <td style={styles.tdComputed}>{suggestedPrice(item)}</td>
                         <td style={styles.tdComputed}>{costPercent(item)}</td>
                         <td style={styles.tdComputed}>{margin(item)}</td>
                       </tr>
@@ -336,7 +347,7 @@ const styles: Record<string, React.CSSProperties> = {
   table: {
     borderCollapse: 'collapse',
     width: '100%',
-    minWidth: 800,
+    minWidth: 960,
   },
   th: {
     textAlign: 'left',
