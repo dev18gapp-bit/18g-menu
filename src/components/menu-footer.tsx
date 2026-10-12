@@ -12,7 +12,7 @@ const styles: Record<string, React.CSSProperties> = {
   footer: {
     marginTop: 40,
     paddingTop: 20,
-    borderTop: '1px solid rgba(245,236,215,0.1)',
+    borderTop: '1px solid rgba(27,21,16,0.15)',
     display: 'flex',
     alignItems: 'center',
     gap: 14,
@@ -23,7 +23,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 4,
   },
   name: {
-    color: 'rgba(245,236,215,0.6)',
+    color: 'rgba(27,21,16,0.65)',
     fontFamily: 'var(--font-raleway)',
     fontSize: 12,
     fontWeight: 700,

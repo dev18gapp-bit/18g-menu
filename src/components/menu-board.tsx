@@ -55,7 +55,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 18,
   },
   sectionTitle: {
-    color: '#C9A84C',
+    color: '#B87333',
     fontFamily: 'var(--font-raleway)',
     fontSize: 15,
     fontWeight: 700,
@@ -66,7 +66,7 @@ const styles: Record<string, React.CSSProperties> = {
   sectionRule: {
     flex: 1,
     height: 0,
-    borderTop: '1px dashed rgba(201,168,76,0.35)',
+    borderTop: '1px dashed rgba(184,115,51,0.4)',
   },
   grid: {
     display: 'grid',
@@ -90,7 +90,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
   },
   itemName: {
-    color: '#F5ECD7',
+    color: '#1B1510',
     fontFamily: 'var(--font-raleway)',
     fontSize: 15,
     fontWeight: 700,
@@ -98,7 +98,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   badge: {
     marginLeft: 8,
-    color: 'rgba(245,236,215,0.45)',
+    color: 'rgba(27,21,16,0.5)',
     fontSize: 11,
     fontWeight: 600,
     letterSpacing: '0.5px',
@@ -106,7 +106,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   itemPrice: {
     flexShrink: 0,
-    color: '#C9A84C',
+    color: '#B87333',
     fontFamily: 'var(--font-raleway)',
     fontSize: 15,
     fontWeight: 700,
@@ -114,7 +114,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   itemDescription: {
     marginTop: 3,
-    color: 'rgba(245,236,215,0.5)',
+    color: 'rgba(27,21,16,0.62)',
     fontFamily: 'var(--font-raleway)',
     fontSize: 12.5,
     lineHeight: 1.45,
