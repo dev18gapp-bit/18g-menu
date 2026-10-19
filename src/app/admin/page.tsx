@@ -18,6 +18,7 @@ interface ItemRow {
   name: string;
   description: string;
   hot_iced: string;
+  size: string;
   price: number | null;
   item_type: string;
   image_url: string | null;
@@ -26,8 +27,8 @@ interface ItemRow {
 }
 
 const SECTION_SUGGESTIONS: Record<number, string[]> = {
-  1: ['Classic', 'Originals', 'Speciality Coffee'],
-  2: ['Refreshers', 'Matcha Bar', 'Speciality Milk Espresso'],
+  1: ['Espresso', 'Speciality Espresso', 'The Lab Experience'],
+  2: ['Matcha Bar', 'Refreshers', 'Chai', 'Pastries', 'Deli'],
 };
 
 function formatPrice(price: number | null): string {
@@ -47,6 +48,7 @@ export default function AdminPage() {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newHotIced, setNewHotIced] = useState('');
+  const [newSize, setNewSize] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newItemType, setNewItemType] = useState<'drink' | 'food'>('drink');
   const [newImage, setNewImage] = useState<ImagePayload | null>(null);
@@ -117,6 +119,7 @@ export default function AdminPage() {
         name: row.name,
         description: row.description,
         hotIced: row.hot_iced,
+        size: row.size,
         price: row.price,
         imageUrl: row.image_url,
         sortOrder: row.sort_order,
@@ -174,6 +177,7 @@ export default function AdminPage() {
           name: newName.trim(),
           description: newDescription.trim(),
           hotIced: newHotIced.trim(),
+          size: newSize.trim(),
           price: newPrice.trim() === '' ? null : Number(newPrice),
           itemType: newItemType,
           sortOrder: sectionItems.length,
@@ -183,6 +187,7 @@ export default function AdminPage() {
       setNewName('');
       setNewDescription('');
       setNewHotIced('');
+      setNewSize('');
       setNewPrice('');
       setNewItemType('drink');
       setNewImage(null);
@@ -339,6 +344,12 @@ export default function AdminPage() {
           />
           <input
             style={{ ...styles.addInput, maxWidth: 100 }}
+            placeholder="Size"
+            value={newSize}
+            onChange={(e) => setNewSize(e.target.value)}
+          />
+          <input
+            style={{ ...styles.addInput, maxWidth: 100 }}
             type="number"
             step="0.01"
             placeholder="Price"
@@ -428,6 +439,12 @@ export default function AdminPage() {
                         defaultValue={item.hot_iced}
                         placeholder="Hot / Iced"
                         onBlur={(e) => e.target.value !== item.hot_iced && patchItem(item.id, { hotIced: e.target.value })}
+                      />
+                      <input
+                        style={{ ...styles.rowInput, ...styles.rowHotIced }}
+                        defaultValue={item.size}
+                        placeholder="Size"
+                        onBlur={(e) => e.target.value !== item.size && patchItem(item.id, { size: e.target.value })}
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowPrice }}

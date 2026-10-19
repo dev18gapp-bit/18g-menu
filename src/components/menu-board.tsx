@@ -24,6 +24,7 @@ export default function MenuBoard({ sections }: MenuBoardProps) {
                 <div style={styles.cardTop}>
                   <span style={styles.itemName}>
                     {item.name}
+                    {item.size && <span style={styles.badge}>{item.size}</span>}
                     {item.hotIced && <span style={styles.badge}>{item.hotIced}</span>}
                   </span>
                   <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
@@ -98,15 +99,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   badge: {
     marginLeft: 8,
-    color: 'rgba(27,21,16,0.5)',
+    color: '#1B1510',
     fontSize: 11,
-    fontWeight: 600,
+    fontWeight: 700,
     letterSpacing: '0.5px',
     textTransform: 'uppercase',
   },
   itemPrice: {
     flexShrink: 0,
-    color: '#B87333',
+    color: '#1B1510',
     fontFamily: 'var(--font-raleway)',
     fontSize: 15,
     fontWeight: 700,

@@ -8,6 +8,7 @@ export interface MenuItem {
   name: string;
   description: string;
   hotIced: string;
+  size: string;
   price: number | null;
   imageUrl: string | null;
   sortOrder: number;
@@ -26,6 +27,7 @@ interface ApiMenuRow {
   name: string;
   description?: string | null;
   hot_iced?: string | null;
+  size?: string | null;
   price?: number | string | null;
   image_url?: string | null;
   sort_order: number;
@@ -40,6 +42,7 @@ function mapRow(row: ApiMenuRow): MenuItem {
     name: row.name,
     description: row.description ?? '',
     hotIced: row.hot_iced ?? '',
+    size: row.size ?? '',
     price: row.price === null || row.price === undefined || row.price === '' ? null : Number(row.price),
     imageUrl: row.image_url ?? null,
     sortOrder: row.sort_order,
