@@ -43,6 +43,8 @@ export default function MenuScreen({ screen }: { screen: number }) {
         <div style={{ ...styles.bgLayer, backgroundImage: `url(${graphics.background})` }} />
       )}
       {graphics.background && <div style={styles.scrim} />}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/logo.jpg" alt="" style={styles.watermark} />
       <div style={styles.content}>
         {loaded && sections.length === 0 ? (
           <p style={styles.emptyText}>Menu coming soon.</p>
@@ -79,6 +81,22 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'fixed',
     inset: 0,
     backgroundColor: 'rgba(16,12,8,0.35)',
+  },
+  // Subtle brand watermark on the page itself. The logo file has a solid
+  // white square background (not transparent) — 'multiply' makes white
+  // areas a no-op against whatever's behind them while the dark mark
+  // still shows faintly, so it blends in without a visible white box.
+  watermark: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '65vmin',
+    height: '65vmin',
+    objectFit: 'contain',
+    opacity: 0.07,
+    mixBlendMode: 'multiply',
+    pointerEvents: 'none',
   },
   content: {
     position: 'relative',

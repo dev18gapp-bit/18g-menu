@@ -26,7 +26,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(27,21,16,0.65)',
     fontFamily: 'var(--font-raleway)',
     fontSize: 19,
-    fontWeight: 800,
+    fontWeight: 700,
     letterSpacing: '2px',
   },
 };
