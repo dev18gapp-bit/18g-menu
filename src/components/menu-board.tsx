@@ -9,10 +9,13 @@ function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: b
   // Each temperature that's actually offered gets its own Size + Price pair,
   // since hot and iced versions of the same drink are often priced
   // differently by size — a single shared price column can't represent that.
+  // Size/price columns use max-content (not a fixed px guess) so a two-value
+  // price like "$6.09/$6.92" widens its own column instead of overflowing
+  // into the next one.
   const columns = [
     'minmax(160px, 1fr)',
-    ...(showHot ? ['100px', '90px'] : []),
-    ...(showIced ? ['100px', '90px'] : []),
+    ...(showHot ? ['max-content', 'max-content'] : []),
+    ...(showIced ? ['max-content', 'max-content'] : []),
   ];
 
   return (
@@ -187,10 +190,11 @@ const styles: Record<string, React.CSSProperties> = {
   priceCell: {
     color: '#1B1510',
     fontFamily: 'var(--font-raleway)',
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 700,
     fontVariantNumeric: 'tabular-nums',
     textAlign: 'right',
+    whiteSpace: 'nowrap',
   },
   columns: {
     display: 'flex',
