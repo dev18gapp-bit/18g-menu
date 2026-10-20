@@ -49,6 +49,29 @@ function ItemCard({ item }: { item: MenuItem }) {
   );
 }
 
+// Two fixed columns, filled top-to-bottom (left column first, then right) —
+// not a wrapping grid, which interleaves items left/right/left/right and
+// breaks the reading order of a longer list.
+function TwoColumnList({ items }: { items: MenuItem[] }) {
+  const splitAt = Math.ceil(items.length / 2);
+  const columns = [items.slice(0, splitAt), items.slice(splitAt)];
+
+  return (
+    <div style={styles.columns}>
+      {columns.map(
+        (column, i) =>
+          column.length > 0 && (
+            <div key={i} style={styles.column}>
+              {column.map((item) => (
+                <ItemCard key={item.id} item={item} />
+              ))}
+            </div>
+          )
+      )}
+    </div>
+  );
+}
+
 export default function MenuBoard({ sections }: MenuBoardProps) {
   return (
     <div style={styles.board}>
@@ -67,11 +90,7 @@ export default function MenuBoard({ sections }: MenuBoardProps) {
             {hasSizing ? (
               <SizeTable items={section.items} showHot={showHot} showIced={showIced} />
             ) : (
-              <div style={styles.grid}>
-                {section.items.map((item) => (
-                  <ItemCard key={item.id} item={item} />
-                ))}
-              </div>
+              <TwoColumnList items={section.items} />
             )}
           </section>
         );
@@ -148,10 +167,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
     textAlign: 'right',
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-    gap: '10px 28px',
+  columns: {
+    display: 'flex',
+    gap: 28,
+  },
+  column: {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
   },
   card: {
     paddingBottom: 10,
