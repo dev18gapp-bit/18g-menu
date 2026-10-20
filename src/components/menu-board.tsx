@@ -1,41 +1,78 @@
-import { formatPrice, type MenuSection } from '@/lib/menu-data';
+import { formatPrice, type MenuItem, type MenuSection } from '@/lib/menu-data';
 
 interface MenuBoardProps {
   sections: MenuSection[];
 }
 
+function ItemRow({ item, badge }: { item: MenuItem; badge: string | null }) {
+  return (
+    <div style={styles.card}>
+      {item.imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={item.imageUrl} alt="" style={styles.cardImage} />
+      )}
+      <div style={styles.cardTop}>
+        <span style={styles.itemName}>
+          {item.name}
+          {badge && <span style={styles.badge}>{badge}</span>}
+        </span>
+        <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
+      </div>
+      {item.description && <p style={styles.itemDescription}>{item.description}</p>}
+    </div>
+  );
+}
+
 export default function MenuBoard({ sections }: MenuBoardProps) {
   return (
     <div style={styles.board}>
-      {sections.map((section) => (
-        <section key={section.name} style={styles.section}>
-          <div style={styles.sectionHead}>
-            <h2 style={styles.sectionTitle}>{section.name}</h2>
-            <div style={styles.sectionRule} />
-          </div>
+      {sections.map((section) => {
+        const hotItems = section.items.filter((i) => i.hotSize);
+        const icedItems = section.items.filter((i) => i.coldSize);
+        // Items with neither — e.g. Pastries, Deli — render as a single
+        // flat grid with no Hot/Iced split, falling back to the legacy
+        // plain hotIced badge if one's set.
+        const plainItems = section.items.filter((i) => !i.hotSize && !i.coldSize);
 
-          <div style={styles.grid}>
-            {section.items.map((item) => (
-              <div key={item.id} style={styles.card}>
-                {item.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.imageUrl} alt="" style={styles.cardImage} />
-                )}
-                <div style={styles.cardTop}>
-                  <span style={styles.itemName}>
-                    {item.name}
-                    {item.hotSize && <span style={styles.badge}>Hot {item.hotSize}</span>}
-                    {item.coldSize && <span style={styles.badge}>Cold {item.coldSize}</span>}
-                    {!item.hotSize && !item.coldSize && item.hotIced && <span style={styles.badge}>{item.hotIced}</span>}
-                  </span>
-                  <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
+        return (
+          <section key={section.name} style={styles.section}>
+            <div style={styles.sectionHead}>
+              <h2 style={styles.sectionTitle}>{section.name}</h2>
+              <div style={styles.sectionRule} />
+            </div>
+
+            {hotItems.length > 0 && (
+              <div style={styles.tempGroup}>
+                <p style={styles.tempLabel}>Hot</p>
+                <div style={styles.grid}>
+                  {hotItems.map((item) => (
+                    <ItemRow key={`${item.id}-hot`} item={item} badge={item.hotSize} />
+                  ))}
                 </div>
-                {item.description && <p style={styles.itemDescription}>{item.description}</p>}
               </div>
-            ))}
-          </div>
-        </section>
-      ))}
+            )}
+
+            {icedItems.length > 0 && (
+              <div style={styles.tempGroup}>
+                <p style={styles.tempLabel}>Iced</p>
+                <div style={styles.grid}>
+                  {icedItems.map((item) => (
+                    <ItemRow key={`${item.id}-iced`} item={item} badge={item.coldSize} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {plainItems.length > 0 && (
+              <div style={styles.grid}>
+                {plainItems.map((item) => (
+                  <ItemRow key={item.id} item={item} badge={item.hotIced || null} />
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -69,6 +106,19 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     height: 0,
     borderTop: '1px dashed rgba(184,115,51,0.4)',
+  },
+  tempGroup: {
+    marginBottom: 20,
+  },
+  tempLabel: {
+    color: '#B87333',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: '2px',
+    textTransform: 'uppercase',
+    opacity: 0.75,
+    marginBottom: 10,
   },
   grid: {
     display: 'grid',

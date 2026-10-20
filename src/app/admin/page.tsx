@@ -355,7 +355,7 @@ export default function AdminPage() {
           />
           <input
             style={{ ...styles.addInput, maxWidth: 100 }}
-            placeholder="Cold Size"
+            placeholder="Iced Size"
             value={newColdSize}
             onChange={(e) => setNewColdSize(e.target.value)}
           />
@@ -460,7 +460,7 @@ export default function AdminPage() {
                       <input
                         style={{ ...styles.rowInput, ...styles.rowHotIced }}
                         defaultValue={item.cold_size}
-                        placeholder="Cold Size"
+                        placeholder="Iced Size"
                         onBlur={(e) => e.target.value !== item.cold_size && patchItem(item.id, { coldSize: e.target.value })}
                       />
                       <input
