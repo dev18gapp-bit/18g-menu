@@ -1,10 +1,36 @@
+import { Fragment } from 'react';
 import { formatPrice, type MenuItem, type MenuSection } from '@/lib/menu-data';
 
 interface MenuBoardProps {
   sections: MenuSection[];
 }
 
-function ItemRow({ item, badge }: { item: MenuItem; badge: string | null }) {
+function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: boolean; showIced: boolean }) {
+  const columns = ['minmax(140px, 1fr)', ...(showHot ? ['80px'] : []), ...(showIced ? ['80px'] : []), '60px'];
+
+  return (
+    <div style={{ ...styles.table, gridTemplateColumns: columns.join(' ') }}>
+      <div style={styles.headerCell} />
+      {showHot && <div style={styles.headerCell}>Hot</div>}
+      {showIced && <div style={styles.headerCell}>Iced</div>}
+      <div style={{ ...styles.headerCell, textAlign: 'right' }}>Price</div>
+
+      {items.map((item) => (
+        <Fragment key={item.id}>
+          <div style={styles.nameCell}>
+            {item.name}
+            {item.description && <p style={styles.itemDescription}>{item.description}</p>}
+          </div>
+          {showHot && <div style={styles.sizeCell}>{item.hotSize || '—'}</div>}
+          {showIced && <div style={styles.sizeCell}>{item.coldSize || '—'}</div>}
+          <div style={styles.priceCell}>{formatPrice(item.price)}</div>
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
+function ItemCard({ item }: { item: MenuItem }) {
   return (
     <div style={styles.card}>
       {item.imageUrl && (
@@ -14,7 +40,7 @@ function ItemRow({ item, badge }: { item: MenuItem; badge: string | null }) {
       <div style={styles.cardTop}>
         <span style={styles.itemName}>
           {item.name}
-          {badge && <span style={styles.badge}>{badge}</span>}
+          {item.hotIced && <span style={styles.badge}>{item.hotIced}</span>}
         </span>
         <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
       </div>
@@ -27,12 +53,9 @@ export default function MenuBoard({ sections }: MenuBoardProps) {
   return (
     <div style={styles.board}>
       {sections.map((section) => {
-        const hotItems = section.items.filter((i) => i.hotSize);
-        const icedItems = section.items.filter((i) => i.coldSize);
-        // Items with neither — e.g. Pastries, Deli — render as a single
-        // flat grid with no Hot/Iced split, falling back to the legacy
-        // plain hotIced badge if one's set.
-        const plainItems = section.items.filter((i) => !i.hotSize && !i.coldSize);
+        const hasSizing = section.items.some((i) => i.hotSize || i.coldSize);
+        const showHot = section.items.some((i) => i.hotSize);
+        const showIced = section.items.some((i) => i.coldSize);
 
         return (
           <section key={section.name} style={styles.section}>
@@ -41,32 +64,12 @@ export default function MenuBoard({ sections }: MenuBoardProps) {
               <div style={styles.sectionRule} />
             </div>
 
-            {hotItems.length > 0 && (
-              <div style={styles.tempGroup}>
-                <p style={styles.tempLabel}>Hot</p>
-                <div style={styles.grid}>
-                  {hotItems.map((item) => (
-                    <ItemRow key={`${item.id}-hot`} item={item} badge={item.hotSize} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {icedItems.length > 0 && (
-              <div style={styles.tempGroup}>
-                <p style={styles.tempLabel}>Iced</p>
-                <div style={styles.grid}>
-                  {icedItems.map((item) => (
-                    <ItemRow key={`${item.id}-iced`} item={item} badge={item.coldSize} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {plainItems.length > 0 && (
+            {hasSizing ? (
+              <SizeTable items={section.items} showHot={showHot} showIced={showIced} />
+            ) : (
               <div style={styles.grid}>
-                {plainItems.map((item) => (
-                  <ItemRow key={item.id} item={item} badge={item.hotIced || null} />
+                {section.items.map((item) => (
+                  <ItemCard key={item.id} item={item} />
                 ))}
               </div>
             )}
@@ -107,18 +110,43 @@ const styles: Record<string, React.CSSProperties> = {
     height: 0,
     borderTop: '1px dashed rgba(184,115,51,0.4)',
   },
-  tempGroup: {
-    marginBottom: 20,
+  table: {
+    display: 'grid',
+    rowGap: 10,
+    columnGap: 16,
+    alignItems: 'baseline',
   },
-  tempLabel: {
+  headerCell: {
     color: '#B87333',
     fontFamily: 'var(--font-raleway)',
     fontSize: 11,
     fontWeight: 700,
-    letterSpacing: '2px',
+    letterSpacing: '1.5px',
     textTransform: 'uppercase',
-    opacity: 0.75,
-    marginBottom: 10,
+    paddingBottom: 6,
+    borderBottom: '1px solid rgba(184,115,51,0.3)',
+  },
+  nameCell: {
+    color: '#1B1510',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 15,
+    fontWeight: 700,
+    letterSpacing: '0.3px',
+  },
+  sizeCell: {
+    color: '#1B1510',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 13,
+    fontWeight: 700,
+    whiteSpace: 'nowrap',
+  },
+  priceCell: {
+    color: '#1B1510',
+    fontFamily: 'var(--font-raleway)',
+    fontSize: 15,
+    fontWeight: 700,
+    fontVariantNumeric: 'tabular-nums',
+    textAlign: 'right',
   },
   grid: {
     display: 'grid',
