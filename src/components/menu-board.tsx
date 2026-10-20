@@ -24,8 +24,9 @@ export default function MenuBoard({ sections }: MenuBoardProps) {
                 <div style={styles.cardTop}>
                   <span style={styles.itemName}>
                     {item.name}
-                    {item.size && <span style={styles.badge}>{item.size}</span>}
-                    {item.hotIced && <span style={styles.badge}>{item.hotIced}</span>}
+                    {item.hotSize && <span style={styles.badge}>Hot {item.hotSize}</span>}
+                    {item.coldSize && <span style={styles.badge}>Cold {item.coldSize}</span>}
+                    {!item.hotSize && !item.coldSize && item.hotIced && <span style={styles.badge}>{item.hotIced}</span>}
                   </span>
                   <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
                 </div>

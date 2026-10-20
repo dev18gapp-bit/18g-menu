@@ -18,7 +18,8 @@ interface ItemRow {
   name: string;
   description: string;
   hot_iced: string;
-  size: string;
+  hot_size: string;
+  cold_size: string;
   price: number | null;
   item_type: string;
   image_url: string | null;
@@ -48,7 +49,8 @@ export default function AdminPage() {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newHotIced, setNewHotIced] = useState('');
-  const [newSize, setNewSize] = useState('');
+  const [newHotSize, setNewHotSize] = useState('');
+  const [newColdSize, setNewColdSize] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newItemType, setNewItemType] = useState<'drink' | 'food'>('drink');
   const [newImage, setNewImage] = useState<ImagePayload | null>(null);
@@ -119,7 +121,8 @@ export default function AdminPage() {
         name: row.name,
         description: row.description,
         hotIced: row.hot_iced,
-        size: row.size,
+        hotSize: row.hot_size,
+        coldSize: row.cold_size,
         price: row.price,
         imageUrl: row.image_url,
         sortOrder: row.sort_order,
@@ -177,7 +180,8 @@ export default function AdminPage() {
           name: newName.trim(),
           description: newDescription.trim(),
           hotIced: newHotIced.trim(),
-          size: newSize.trim(),
+          hotSize: newHotSize.trim(),
+          coldSize: newColdSize.trim(),
           price: newPrice.trim() === '' ? null : Number(newPrice),
           itemType: newItemType,
           sortOrder: sectionItems.length,
@@ -187,7 +191,8 @@ export default function AdminPage() {
       setNewName('');
       setNewDescription('');
       setNewHotIced('');
-      setNewSize('');
+      setNewHotSize('');
+      setNewColdSize('');
       setNewPrice('');
       setNewItemType('drink');
       setNewImage(null);
@@ -344,9 +349,15 @@ export default function AdminPage() {
           />
           <input
             style={{ ...styles.addInput, maxWidth: 100 }}
-            placeholder="Size"
-            value={newSize}
-            onChange={(e) => setNewSize(e.target.value)}
+            placeholder="Hot Size"
+            value={newHotSize}
+            onChange={(e) => setNewHotSize(e.target.value)}
+          />
+          <input
+            style={{ ...styles.addInput, maxWidth: 100 }}
+            placeholder="Cold Size"
+            value={newColdSize}
+            onChange={(e) => setNewColdSize(e.target.value)}
           />
           <input
             style={{ ...styles.addInput, maxWidth: 100 }}
@@ -442,9 +453,15 @@ export default function AdminPage() {
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowHotIced }}
-                        defaultValue={item.size}
-                        placeholder="Size"
-                        onBlur={(e) => e.target.value !== item.size && patchItem(item.id, { size: e.target.value })}
+                        defaultValue={item.hot_size}
+                        placeholder="Hot Size"
+                        onBlur={(e) => e.target.value !== item.hot_size && patchItem(item.id, { hotSize: e.target.value })}
+                      />
+                      <input
+                        style={{ ...styles.rowInput, ...styles.rowHotIced }}
+                        defaultValue={item.cold_size}
+                        placeholder="Cold Size"
+                        onBlur={(e) => e.target.value !== item.cold_size && patchItem(item.id, { coldSize: e.target.value })}
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowPrice }}
