@@ -28,7 +28,7 @@ interface ItemRow {
 }
 
 const SECTION_SUGGESTIONS: Record<number, string[]> = {
-  1: ['Espresso', 'Speciality Espresso', 'The Lab Experience'],
+  1: ['Classic', 'Speciality Espresso', 'The Lab Experience'],
   2: ['Matcha Bar', 'Refreshers', 'Chai', 'Viennoiserie', 'Patisserie', 'Deli'],
 };
 
