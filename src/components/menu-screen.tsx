@@ -83,7 +83,7 @@ const styles: Record<string, React.CSSProperties> = {
   content: {
     position: 'relative',
     width: '100%',
-    maxWidth: 900,
+    maxWidth: 1200,
     // Cream "paper card" so black item names and copper accents read
     // clearly whether or not a background photo is set.
     backgroundColor: 'rgba(250,244,231,0.88)',
@@ -94,6 +94,6 @@ const styles: Record<string, React.CSSProperties> = {
   emptyText: {
     color: 'rgba(27,21,16,0.5)',
     fontFamily: 'var(--font-raleway)',
-    fontSize: 20,
+    fontSize: 26,
   },
 };

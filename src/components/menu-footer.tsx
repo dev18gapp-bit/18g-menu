@@ -18,15 +18,15 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 14,
   },
   logo: {
-    height: 36,
+    height: 48,
     width: 'auto',
     borderRadius: 4,
   },
   name: {
     color: 'rgba(27,21,16,0.65)',
     fontFamily: 'var(--font-raleway)',
-    fontSize: 15,
-    fontWeight: 700,
+    fontSize: 19,
+    fontWeight: 800,
     letterSpacing: '2px',
   },
 };
