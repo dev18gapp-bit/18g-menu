@@ -43,15 +43,20 @@ export default function MenuScreen({ screen }: { screen: number }) {
         <div style={{ ...styles.bgLayer, backgroundImage: `url(${graphics.background})` }} />
       )}
       {graphics.background && <div style={styles.scrim} />}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/logo.jpg" alt="" style={styles.watermark} />
       <div style={styles.content}>
-        {loaded && sections.length === 0 ? (
-          <p style={styles.emptyText}>Menu coming soon.</p>
-        ) : (
-          <MenuBoard sections={sections} />
-        )}
-        <MenuFooter />
+        {/* Sits inside the content card, behind the menu text — the card's
+            own near-opaque background would otherwise hide a watermark
+            placed behind the whole page. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/logo.jpg" alt="" style={styles.watermark} />
+        <div style={styles.contentInner}>
+          {loaded && sections.length === 0 ? (
+            <p style={styles.emptyText}>Menu coming soon.</p>
+          ) : (
+            <MenuBoard sections={sections} />
+          )}
+          <MenuFooter />
+        </div>
       </div>
     </main>
   );
@@ -82,22 +87,6 @@ const styles: Record<string, React.CSSProperties> = {
     inset: 0,
     backgroundColor: 'rgba(16,12,8,0.35)',
   },
-  // Subtle brand watermark on the page itself. The logo file has a solid
-  // white square background (not transparent) — 'multiply' makes white
-  // areas a no-op against whatever's behind them while the dark mark
-  // still shows faintly, so it blends in without a visible white box.
-  watermark: {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '65vmin',
-    height: '65vmin',
-    objectFit: 'contain',
-    opacity: 0.07,
-    mixBlendMode: 'multiply',
-    pointerEvents: 'none',
-  },
   content: {
     position: 'relative',
     width: '100%',
@@ -108,6 +97,30 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 16,
     padding: 'clamp(20px, 3vw, 40px)',
     boxShadow: '0 20px 50px rgba(20,14,8,0.25)',
+    overflow: 'hidden',
+  },
+  // Big, light brand mark centered behind the menu text. The logo file has
+  // a solid white square background (not transparent) — 'multiply' makes
+  // white areas a no-op against the card's cream background while the dark
+  // mark itself shows through at low opacity, so it reads as a watermark
+  // rather than a white box. Needs 'position: relative' on its sibling
+  // (contentInner) below, or the non-positioned menu text would paint
+  // first and this positioned image would cover it instead of sitting
+  // behind it.
+  watermark: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '90%',
+    maxWidth: 900,
+    height: 'auto',
+    opacity: 0.16,
+    mixBlendMode: 'multiply',
+    pointerEvents: 'none',
+  },
+  contentInner: {
+    position: 'relative',
   },
   emptyText: {
     color: 'rgba(27,21,16,0.5)',
