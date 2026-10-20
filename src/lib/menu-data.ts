@@ -10,6 +10,8 @@ export interface MenuItem {
   hotIced: string;
   hotSize: string;
   coldSize: string;
+  hotPrice: number | null;
+  coldPrice: number | null;
   price: number | null;
   imageUrl: string | null;
   sortOrder: number;
@@ -30,9 +32,15 @@ interface ApiMenuRow {
   hot_iced?: string | null;
   hot_size?: string | null;
   cold_size?: string | null;
+  hot_price?: number | string | null;
+  cold_price?: number | string | null;
   price?: number | string | null;
   image_url?: string | null;
   sort_order: number;
+}
+
+function toPrice(value: number | string | null | undefined): number | null {
+  return value === null || value === undefined || value === '' ? null : Number(value);
 }
 
 function mapRow(row: ApiMenuRow): MenuItem {
@@ -46,7 +54,9 @@ function mapRow(row: ApiMenuRow): MenuItem {
     hotIced: row.hot_iced ?? '',
     hotSize: row.hot_size ?? '',
     coldSize: row.cold_size ?? '',
-    price: row.price === null || row.price === undefined || row.price === '' ? null : Number(row.price),
+    hotPrice: toPrice(row.hot_price),
+    coldPrice: toPrice(row.cold_price),
+    price: toPrice(row.price),
     imageUrl: row.image_url ?? null,
     sortOrder: row.sort_order,
   };

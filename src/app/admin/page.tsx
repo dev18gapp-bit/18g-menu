@@ -20,6 +20,8 @@ interface ItemRow {
   hot_iced: string;
   hot_size: string;
   cold_size: string;
+  hot_price: number | null;
+  cold_price: number | null;
   price: number | null;
   item_type: string;
   image_url: string | null;
@@ -51,6 +53,8 @@ export default function AdminPage() {
   const [newHotIced, setNewHotIced] = useState('');
   const [newHotSize, setNewHotSize] = useState('');
   const [newColdSize, setNewColdSize] = useState('');
+  const [newHotPrice, setNewHotPrice] = useState('');
+  const [newColdPrice, setNewColdPrice] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newItemType, setNewItemType] = useState<'drink' | 'food'>('drink');
   const [newImage, setNewImage] = useState<ImagePayload | null>(null);
@@ -123,6 +127,8 @@ export default function AdminPage() {
         hotIced: row.hot_iced,
         hotSize: row.hot_size,
         coldSize: row.cold_size,
+        hotPrice: row.hot_price,
+        coldPrice: row.cold_price,
         price: row.price,
         imageUrl: row.image_url,
         sortOrder: row.sort_order,
@@ -182,6 +188,8 @@ export default function AdminPage() {
           hotIced: newHotIced.trim(),
           hotSize: newHotSize.trim(),
           coldSize: newColdSize.trim(),
+          hotPrice: newHotPrice.trim() === '' ? null : Number(newHotPrice),
+          coldPrice: newColdPrice.trim() === '' ? null : Number(newColdPrice),
           price: newPrice.trim() === '' ? null : Number(newPrice),
           itemType: newItemType,
           sortOrder: sectionItems.length,
@@ -193,6 +201,8 @@ export default function AdminPage() {
       setNewHotIced('');
       setNewHotSize('');
       setNewColdSize('');
+      setNewHotPrice('');
+      setNewColdPrice('');
       setNewPrice('');
       setNewItemType('drink');
       setNewImage(null);
@@ -360,6 +370,22 @@ export default function AdminPage() {
             onChange={(e) => setNewColdSize(e.target.value)}
           />
           <input
+            style={{ ...styles.addInput, maxWidth: 90 }}
+            type="number"
+            step="0.01"
+            placeholder="Hot Price"
+            value={newHotPrice}
+            onChange={(e) => setNewHotPrice(e.target.value)}
+          />
+          <input
+            style={{ ...styles.addInput, maxWidth: 90 }}
+            type="number"
+            step="0.01"
+            placeholder="Iced Price"
+            value={newColdPrice}
+            onChange={(e) => setNewColdPrice(e.target.value)}
+          />
+          <input
             style={{ ...styles.addInput, maxWidth: 100 }}
             type="number"
             step="0.01"
@@ -462,6 +488,30 @@ export default function AdminPage() {
                         defaultValue={item.cold_size}
                         placeholder="Iced Size"
                         onBlur={(e) => e.target.value !== item.cold_size && patchItem(item.id, { coldSize: e.target.value })}
+                      />
+                      <input
+                        style={{ ...styles.rowInput, ...styles.rowPrice }}
+                        type="number"
+                        step="0.01"
+                        defaultValue={item.hot_price ?? ''}
+                        placeholder="Hot $"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          const next = v === '' ? null : Number(v);
+                          if (next !== item.hot_price) patchItem(item.id, { hotPrice: next });
+                        }}
+                      />
+                      <input
+                        style={{ ...styles.rowInput, ...styles.rowPrice }}
+                        type="number"
+                        step="0.01"
+                        defaultValue={item.cold_price ?? ''}
+                        placeholder="Iced $"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          const next = v === '' ? null : Number(v);
+                          if (next !== item.cold_price) patchItem(item.id, { coldPrice: next });
+                        }}
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowPrice }}

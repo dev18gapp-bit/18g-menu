@@ -6,14 +6,30 @@ interface MenuBoardProps {
 }
 
 function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: boolean; showIced: boolean }) {
-  const columns = ['minmax(140px, 1fr)', ...(showHot ? ['80px'] : []), ...(showIced ? ['80px'] : []), '60px'];
+  // Each temperature that's actually offered gets its own Size + Price pair,
+  // since hot and iced versions of the same drink are often priced
+  // differently by size — a single shared price column can't represent that.
+  const columns = [
+    'minmax(140px, 1fr)',
+    ...(showHot ? ['70px', '60px'] : []),
+    ...(showIced ? ['70px', '60px'] : []),
+  ];
 
   return (
     <div style={{ ...styles.table, gridTemplateColumns: columns.join(' ') }}>
       <div style={styles.headerCell} />
-      {showHot && <div style={styles.headerCell}>Hot</div>}
-      {showIced && <div style={styles.headerCell}>Iced</div>}
-      <div style={{ ...styles.headerCell, textAlign: 'right' }}>Price</div>
+      {showHot && (
+        <>
+          <div style={styles.headerCell}>Hot</div>
+          <div style={{ ...styles.headerCell, textAlign: 'right' }}>Price</div>
+        </>
+      )}
+      {showIced && (
+        <>
+          <div style={styles.headerCell}>Iced</div>
+          <div style={{ ...styles.headerCell, textAlign: 'right' }}>Price</div>
+        </>
+      )}
 
       {items.map((item) => (
         <Fragment key={item.id}>
@@ -21,9 +37,18 @@ function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: b
             {item.name}
             {item.description && <p style={styles.itemDescription}>{item.description}</p>}
           </div>
-          {showHot && <div style={styles.sizeCell}>{item.hotSize || '—'}</div>}
-          {showIced && <div style={styles.sizeCell}>{item.coldSize || '—'}</div>}
-          <div style={styles.priceCell}>{formatPrice(item.price)}</div>
+          {showHot && (
+            <>
+              <div style={styles.sizeCell}>{item.hotSize || '—'}</div>
+              <div style={styles.priceCell}>{item.hotSize ? formatPrice(item.hotPrice) : ''}</div>
+            </>
+          )}
+          {showIced && (
+            <>
+              <div style={styles.sizeCell}>{item.coldSize || '—'}</div>
+              <div style={styles.priceCell}>{item.coldSize ? formatPrice(item.coldPrice) : ''}</div>
+            </>
+          )}
         </Fragment>
       ))}
     </div>
