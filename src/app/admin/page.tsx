@@ -20,8 +20,8 @@ interface ItemRow {
   hot_iced: string;
   hot_size: string;
   cold_size: string;
-  hot_price: number | null;
-  cold_price: number | null;
+  hot_price: string;
+  cold_price: string;
   price: number | null;
   item_type: string;
   image_url: string | null;
@@ -188,8 +188,8 @@ export default function AdminPage() {
           hotIced: newHotIced.trim(),
           hotSize: newHotSize.trim(),
           coldSize: newColdSize.trim(),
-          hotPrice: newHotPrice.trim() === '' ? null : Number(newHotPrice),
-          coldPrice: newColdPrice.trim() === '' ? null : Number(newColdPrice),
+          hotPrice: newHotPrice.trim(),
+          coldPrice: newColdPrice.trim(),
           price: newPrice.trim() === '' ? null : Number(newPrice),
           itemType: newItemType,
           sortOrder: sectionItems.length,
@@ -371,17 +371,13 @@ export default function AdminPage() {
           />
           <input
             style={{ ...styles.addInput, maxWidth: 90 }}
-            type="number"
-            step="0.01"
-            placeholder="Hot Price"
+            placeholder="Hot Price ($2/$3)"
             value={newHotPrice}
             onChange={(e) => setNewHotPrice(e.target.value)}
           />
           <input
             style={{ ...styles.addInput, maxWidth: 90 }}
-            type="number"
-            step="0.01"
-            placeholder="Iced Price"
+            placeholder="Iced Price ($2/$3)"
             value={newColdPrice}
             onChange={(e) => setNewColdPrice(e.target.value)}
           />
@@ -491,27 +487,15 @@ export default function AdminPage() {
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowPrice }}
-                        type="number"
-                        step="0.01"
-                        defaultValue={item.hot_price ?? ''}
-                        placeholder="Hot $"
-                        onBlur={(e) => {
-                          const v = e.target.value.trim();
-                          const next = v === '' ? null : Number(v);
-                          if (next !== item.hot_price) patchItem(item.id, { hotPrice: next });
-                        }}
+                        defaultValue={item.hot_price}
+                        placeholder="Hot $2/$3"
+                        onBlur={(e) => e.target.value !== item.hot_price && patchItem(item.id, { hotPrice: e.target.value })}
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowPrice }}
-                        type="number"
-                        step="0.01"
-                        defaultValue={item.cold_price ?? ''}
-                        placeholder="Iced $"
-                        onBlur={(e) => {
-                          const v = e.target.value.trim();
-                          const next = v === '' ? null : Number(v);
-                          if (next !== item.cold_price) patchItem(item.id, { coldPrice: next });
-                        }}
+                        defaultValue={item.cold_price}
+                        placeholder="Iced $2/$3"
+                        onBlur={(e) => e.target.value !== item.cold_price && patchItem(item.id, { coldPrice: e.target.value })}
                       />
                       <input
                         style={{ ...styles.rowInput, ...styles.rowPrice }}

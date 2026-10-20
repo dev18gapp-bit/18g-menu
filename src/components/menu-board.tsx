@@ -40,13 +40,13 @@ function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: b
           {showHot && (
             <>
               <div style={styles.sizeCell}>{item.hotSize || '—'}</div>
-              <div style={styles.priceCell}>{item.hotSize ? formatPrice(item.hotPrice) : ''}</div>
+              <div style={styles.priceCell}>{item.hotSize ? item.hotPrice || '—' : ''}</div>
             </>
           )}
           {showIced && (
             <>
               <div style={styles.sizeCell}>{item.coldSize || '—'}</div>
-              <div style={styles.priceCell}>{item.coldSize ? formatPrice(item.coldPrice) : ''}</div>
+              <div style={styles.priceCell}>{item.coldSize ? item.coldPrice || '—' : ''}</div>
             </>
           )}
         </Fragment>
