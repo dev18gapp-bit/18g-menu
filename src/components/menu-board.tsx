@@ -244,10 +244,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   itemDescription: {
     marginTop: 4,
-    color: 'rgba(27,21,16,0.65)',
+    color: 'rgba(27,21,16,0.75)',
     fontFamily: 'var(--font-raleway)',
     fontSize: 18,
-    fontWeight: 500,
+    fontWeight: 650,
     lineHeight: 1.45,
   },
 };
