@@ -120,6 +120,7 @@ function labOverrides(item: MenuItem): { hot?: boolean; iced?: boolean; sizes?: 
 }
 
 const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
+const COLD_FOAM = ['Vanilla', 'Banana'];
 
 // "12/16 oz" -> ['M','L']; "8/12/16 oz" -> ['S','M','L']; "5 oz" -> ['ONE SIZE']
 function sizeLabels(value: string): string[] {
@@ -268,6 +269,24 @@ function AddOns() {
   );
 }
 
+function ColdFoam() {
+  return (
+    <section style={styles.section}>
+      <div style={styles.sectionHead}>
+        <h2 style={styles.sectionTitle}>Add A Cold Foam</h2>
+        <div style={styles.sectionRule} />
+      </div>
+      <div style={styles.chips}>
+        {COLD_FOAM.map((f) => (
+          <span key={f} style={styles.chip}>
+            {f}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
   const [sections, setSections] = useState<MenuSection[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -328,6 +347,7 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
             ))}
             <AddOns />
             <GoodToKnow />
+            <ColdFoam />
           </>
         )}
       </div>
