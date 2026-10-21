@@ -55,41 +55,41 @@ function sizeLabels(value: string): string[] {
   return ['S', 'M', 'L'];
 }
 
-function DrinkRow({ item }: { item: MenuItem }) {
+function DrinkRow({ item, dark }: { item: MenuItem; dark?: boolean }) {
   const sizes = sizeLabels(item.hotSize || item.coldSize);
   return (
     <div style={styles.row}>
       <div style={styles.rowLine}>
-        <span style={styles.rowName}>{item.name}</span>
+        <span style={dark ? styles.rowNameDark : styles.rowName}>{item.name}</span>
         {item.hotSize && <span style={{ ...styles.pill, ...styles.pillHot }}>HOT</span>}
         {item.coldSize && <span style={{ ...styles.pill, ...styles.pillIced }}>ICED</span>}
-        <span style={styles.leader} />
+        <span style={dark ? styles.leaderDark : styles.leader} />
         {sizes.map((s) => (
-          <span key={s} style={styles.sizeBox}>
+          <span key={s} style={dark ? styles.sizeBoxDark : styles.sizeBox}>
             {s}
           </span>
         ))}
-        <span style={styles.rowPrice}>{formatPrice(item.price)}</span>
+        <span style={dark ? styles.rowPriceDark : styles.rowPrice}>{formatPrice(item.price)}</span>
       </div>
-      {item.description && <p style={styles.rowDesc}>{item.description}</p>}
+      {item.description && <p style={dark ? styles.rowDescDark : styles.rowDesc}>{item.description}</p>}
     </div>
   );
 }
 
-function FoodRow({ item }: { item: MenuItem }) {
+function FoodRow({ item, dark }: { item: MenuItem; dark?: boolean }) {
   return (
     <div style={styles.row}>
       <div style={styles.rowLine}>
-        <span style={styles.rowName}>{item.name}</span>
-        <span style={styles.leader} />
-        <span style={styles.rowPrice}>{formatPrice(item.price)}</span>
+        <span style={dark ? styles.rowNameDark : styles.rowName}>{item.name}</span>
+        <span style={dark ? styles.leaderDark : styles.leader} />
+        <span style={dark ? styles.rowPriceDark : styles.rowPrice}>{formatPrice(item.price)}</span>
       </div>
-      {item.description && <p style={styles.rowDesc}>{item.description}</p>}
+      {item.description && <p style={dark ? styles.rowDescDark : styles.rowDesc}>{item.description}</p>}
     </div>
   );
 }
 
-function TwoColGrid({ items, food }: { items: MenuItem[]; food?: boolean }) {
+function TwoColGrid({ items, food, dark }: { items: MenuItem[]; food?: boolean; dark?: boolean }) {
   const splitAt = Math.ceil(items.length / 2);
   const cols = [items.slice(0, splitAt), items.slice(splitAt)];
   return (
@@ -98,7 +98,9 @@ function TwoColGrid({ items, food }: { items: MenuItem[]; food?: boolean }) {
         (col, i) =>
           col.length > 0 && (
             <div key={i} style={styles.gridCol}>
-              {col.map((item) => (food ? <FoodRow key={item.id} item={item} /> : <DrinkRow key={item.id} item={item} />))}
+              {col.map((item) =>
+                food ? <FoodRow key={item.id} item={item} dark={dark} /> : <DrinkRow key={item.id} item={item} dark={dark} />
+              )}
             </div>
           )
       )}
@@ -119,7 +121,7 @@ function HeroSection({ section, index }: { section: MenuSection; index: number }
           <p style={styles.heroNoteBody}>Any drink here can be made with the beans of your choice.</p>
         </div>
       </div>
-      <TwoColGrid items={section.items} />
+      <TwoColGrid items={section.items} dark />
     </div>
   );
 }
@@ -423,6 +425,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
     whiteSpace: 'nowrap',
   },
+  rowNameDark: {
+    color: CREAM,
+    fontSize: 20,
+    fontWeight: 800,
+    whiteSpace: 'nowrap',
+  },
   pill: {
     fontSize: 11,
     fontWeight: 800,
@@ -444,6 +452,12 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: `2px dotted rgba(42,30,23,0.3)`,
     marginTop: 8,
   },
+  leaderDark: {
+    flex: 1,
+    height: 0,
+    borderBottom: `2px dotted rgba(243,236,222,0.3)`,
+    marginTop: 8,
+  },
   sizeBox: {
     border: `1.5px solid rgba(42,30,23,0.4)`,
     borderRadius: 5,
@@ -453,6 +467,15 @@ const styles: Record<string, React.CSSProperties> = {
     color: INK,
     whiteSpace: 'nowrap',
   },
+  sizeBoxDark: {
+    border: `1.5px solid rgba(243,236,222,0.4)`,
+    borderRadius: 5,
+    padding: '2px 8px',
+    fontSize: 13,
+    fontWeight: 700,
+    color: CREAM,
+    whiteSpace: 'nowrap',
+  },
   rowPrice: {
     color: MAROON,
     fontSize: 20,
@@ -460,8 +483,21 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
     whiteSpace: 'nowrap',
   },
+  rowPriceDark: {
+    color: '#E0A84E',
+    fontSize: 20,
+    fontWeight: 800,
+    fontVariantNumeric: 'tabular-nums',
+    whiteSpace: 'nowrap',
+  },
   rowDesc: {
     color: 'rgba(42,30,23,0.6)',
+    fontSize: 14,
+    fontStyle: 'italic',
+    margin: 0,
+  },
+  rowDescDark: {
+    color: 'rgba(243,236,222,0.65)',
     fontSize: 14,
     fontStyle: 'italic',
     margin: 0,
