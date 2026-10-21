@@ -110,13 +110,14 @@ const DISPLAY_NAME: Record<string, string> = {
 };
 
 // Draft-only presentation overrides for The Lab Experience: the live data
-// has every item as iced/one-size, but this design calls for most of them
-// to show as two sizes, and Aeropress specifically as hot. Overriding here
-// (not in the DB) keeps the live screens untouched.
-const LAB_OVERRIDES: Record<string, { hot?: boolean; iced?: boolean; sizes?: string[] }> = {
-  Aeropress: { hot: true, iced: false, sizes: ['M', 'L'] },
-  Espressotini: { sizes: ['ONE SIZE'] },
-};
+// has every item as iced/one-size, but this design calls for every item to
+// show M/L except Espressotini (one size), and Aeropress specifically as
+// hot. Overriding here (not in the DB) keeps the live screens untouched.
+function labOverrides(item: MenuItem): { hot?: boolean; iced?: boolean; sizes?: string[] } {
+  if (item.name === 'Espressotini') return { sizes: ['ONE SIZE'] };
+  if (item.name === 'Aeropress') return { hot: true, iced: false, sizes: ['M', 'L'] };
+  return { sizes: ['M', 'L'] };
+}
 
 const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
 
@@ -214,7 +215,7 @@ function HeroSection({ section, index, tagline }: { section: MenuSection; index:
           <p style={styles.heroNoteBody}>Any drink here can be made with the beans of your choice.</p>
         </div>
       </div>
-      <TwoColGrid items={section.items} dark getOverrides={(item) => LAB_OVERRIDES[item.name]} />
+      <TwoColGrid items={section.items} dark getOverrides={labOverrides} />
     </div>
   );
 }
@@ -366,8 +367,10 @@ const styles: Record<string, React.CSSProperties> = {
   // solid white background (not transparent), and 'multiply' makes white
   // areas a no-op against the maroon bar while the dark mark itself stays
   // visible — no boxed badge needed, no white square edge.
+  // Scaled to roughly match the page title's own size (same clamp range),
+  // not a small corner mark.
   headerLogo: {
-    height: 92,
+    height: 'clamp(90px, 9vw, 150px)',
     width: 'auto',
     display: 'block',
     mixBlendMode: 'multiply',
