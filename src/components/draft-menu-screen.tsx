@@ -5,6 +5,68 @@ import { fetchMenu, formatPrice, groupByScreen, type MenuItem, type MenuSection 
 
 const POLL_INTERVAL_MS = 120_000;
 
+// Simple line-art icons in the spirit of the reference PDF's small section
+// glyphs (flask, cup, whisk, etc.) — hand-drawn outlines, not emoji.
+type IconKey = 'flask' | 'cup' | 'pitcher' | 'whisk' | 'tea' | 'glass' | 'croissant' | 'cake' | 'sandwich' | 'dot';
+
+function Icon({ name, style }: { name: IconKey; style?: React.CSSProperties }) {
+  const common = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  const paths: Record<IconKey, React.ReactNode> = {
+    flask: (
+      <>
+        <path d="M9 2h6M10 2v6l-5 10a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-10V2" />
+        <path d="M7.5 15h9" />
+      </>
+    ),
+    cup: (
+      <>
+        <path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z" />
+        <path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17" />
+        <path d="M4 8V5h13v3" />
+      </>
+    ),
+    pitcher: <path d="M6 3h8l-1 4h2l2 3-3 11H8L5 10l2-3h2L6 3Z" />,
+    whisk: (
+      <>
+        <path d="M4 12c0 4 3.5 8 8 8s8-4 8-8" />
+        <path d="M12 2v6M9 3l1 5M15 3l-1 5" />
+      </>
+    ),
+    tea: (
+      <>
+        <path d="M5 10h11a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3H8a4 4 0 0 1-4-4v-3Z" />
+        <path d="M5 11H2M9 6v4" />
+        <path d="M18 11l3-1-1 4" />
+      </>
+    ),
+    glass: (
+      <>
+        <path d="M7 4h10l-1.3 15.2a2 2 0 0 1-2 1.8h-3.4a2 2 0 0 1-2-1.8L7 4Z" />
+        <path d="M14 2l1 6" />
+      </>
+    ),
+    croissant: <path d="M4 15c2-7 8-11 14-10-1 1-2 2-2 4 2 0 3 1 4 2-1 3-4 5-7 5-1 2-2 3-4 3-3 0-5-2-5-4Z" />,
+    cake: (
+      <>
+        <path d="M4 20h16M6 20l1-9 5-6 5 6 1 9" />
+        <path d="M9 11h6" />
+      </>
+    ),
+    sandwich: (
+      <>
+        <path d="M3 11h18l-2 7a2 2 0 0 1-2 1.6H7A2 2 0 0 1 5 18l-2-7Z" />
+        <path d="M3 11c1-4 4-7 9-7s8 3 9 7" />
+      </>
+    ),
+    dot: <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />,
+  };
+  return (
+    <svg {...common} width="1em" height="1em" style={style}>
+      {paths[name]}
+    </svg>
+  );
+}
+
 // Per-screen layout: which section is the big "featured" hero box (if any),
 // and the display order / icon / numbering for the rest. Sections not
 // listed here still render, appended at the end in whatever order the API
@@ -12,18 +74,18 @@ const POLL_INTERVAL_MS = 120_000;
 interface ScreenConfig {
   pageLabel: string;
   title: string;
-  hero: string | null;
-  order: { name: string; icon: string }[];
+  hero: { name: string; tagline: string } | null;
+  order: { name: string; icon: IconKey }[];
 }
 
 const SCREEN_CONFIG: Record<number, ScreenConfig> = {
   1: {
     pageLabel: 'MENU — 01 / 02',
     title: 'COFFEE',
-    hero: 'The Lab Experience',
+    hero: { name: 'The Lab Experience', tagline: 'FEATURED · SLOW BREWS, ESPRESSO & MATCHA' },
     order: [
-      { name: 'Classic', icon: '☕' },
-      { name: 'Speciality Espresso', icon: '🥛' },
+      { name: 'Classic', icon: 'cup' },
+      { name: 'Speciality Espresso', icon: 'pitcher' },
     ],
   },
   2: {
@@ -31,14 +93,29 @@ const SCREEN_CONFIG: Record<number, ScreenConfig> = {
     title: 'BEYOND COFFEE',
     hero: null,
     order: [
-      { name: 'Matcha Bar', icon: '🍵' },
-      { name: 'Chai', icon: '🫖' },
-      { name: 'Refreshers', icon: '🍹' },
-      { name: 'Viennoiserie', icon: '🥐' },
-      { name: 'Patisserie', icon: '🍰' },
-      { name: 'Deli', icon: '🥪' },
+      { name: 'Matcha Bar', icon: 'whisk' },
+      { name: 'Chai', icon: 'tea' },
+      { name: 'Refreshers', icon: 'glass' },
+      { name: 'Viennoiserie', icon: 'croissant' },
+      { name: 'Patisserie', icon: 'cake' },
+      { name: 'Deli', icon: 'sandwich' },
     ],
   },
+};
+
+// Display-only renames — the underlying DB section name (used for data
+// lookups above) stays "Matcha Bar" so the live screens are unaffected.
+const DISPLAY_NAME: Record<string, string> = {
+  'Matcha Bar': 'Ceremonial Matcha',
+};
+
+// Draft-only presentation overrides for The Lab Experience: the live data
+// has every item as iced/one-size, but this design calls for most of them
+// to show as two sizes, and Aeropress specifically as hot. Overriding here
+// (not in the DB) keeps the live screens untouched.
+const LAB_OVERRIDES: Record<string, { hot?: boolean; iced?: boolean; sizes?: string[] }> = {
+  Aeropress: { hot: true, iced: false, sizes: ['M', 'L'] },
+  Espressotini: { sizes: ['ONE SIZE'] },
 };
 
 const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
@@ -55,14 +132,16 @@ function sizeLabels(value: string): string[] {
   return ['S', 'M', 'L'];
 }
 
-function DrinkRow({ item, dark }: { item: MenuItem; dark?: boolean }) {
-  const sizes = sizeLabels(item.hotSize || item.coldSize);
+function DrinkRow({ item, dark, overrides }: { item: MenuItem; dark?: boolean; overrides?: { hot?: boolean; iced?: boolean; sizes?: string[] } }) {
+  const showHot = overrides?.hot ?? Boolean(item.hotSize);
+  const showIced = overrides?.iced ?? Boolean(item.coldSize);
+  const sizes = overrides?.sizes ?? sizeLabels(item.hotSize || item.coldSize);
   return (
     <div style={styles.row}>
       <div style={styles.rowLine}>
         <span style={dark ? styles.rowNameDark : styles.rowName}>{item.name}</span>
-        {item.hotSize && <span style={{ ...styles.pill, ...styles.pillHot }}>HOT</span>}
-        {item.coldSize && <span style={{ ...styles.pill, ...styles.pillIced }}>ICED</span>}
+        {showHot && <span style={{ ...styles.pill, ...styles.pillHot }}>HOT</span>}
+        {showIced && <span style={{ ...styles.pill, ...styles.pillIced }}>ICED</span>}
         <span style={dark ? styles.leaderDark : styles.leader} />
         {sizes.map((s) => (
           <span key={s} style={dark ? styles.sizeBoxDark : styles.sizeBox}>
@@ -89,7 +168,17 @@ function FoodRow({ item, dark }: { item: MenuItem; dark?: boolean }) {
   );
 }
 
-function TwoColGrid({ items, food, dark }: { items: MenuItem[]; food?: boolean; dark?: boolean }) {
+function TwoColGrid({
+  items,
+  food,
+  dark,
+  getOverrides,
+}: {
+  items: MenuItem[];
+  food?: boolean;
+  dark?: boolean;
+  getOverrides?: (item: MenuItem) => { hot?: boolean; iced?: boolean; sizes?: string[] } | undefined;
+}) {
   const splitAt = Math.ceil(items.length / 2);
   const cols = [items.slice(0, splitAt), items.slice(splitAt)];
   return (
@@ -99,7 +188,11 @@ function TwoColGrid({ items, food, dark }: { items: MenuItem[]; food?: boolean; 
           col.length > 0 && (
             <div key={i} style={styles.gridCol}>
               {col.map((item) =>
-                food ? <FoodRow key={item.id} item={item} dark={dark} /> : <DrinkRow key={item.id} item={item} dark={dark} />
+                food ? (
+                  <FoodRow key={item.id} item={item} dark={dark} />
+                ) : (
+                  <DrinkRow key={item.id} item={item} dark={dark} overrides={getOverrides?.(item)} />
+                )
               )}
             </div>
           )
@@ -108,11 +201,11 @@ function TwoColGrid({ items, food, dark }: { items: MenuItem[]; food?: boolean; 
   );
 }
 
-function HeroSection({ section, index }: { section: MenuSection; index: number }) {
+function HeroSection({ section, index, tagline }: { section: MenuSection; index: number; tagline: string }) {
   return (
     <div style={styles.hero}>
       <p style={styles.heroKicker}>
-        {String(index).padStart(2, '0')} — FEATURED · {section.name.toUpperCase()}
+        {String(index).padStart(2, '0')} — {tagline}
       </p>
       <div style={styles.heroHead}>
         <h2 style={styles.heroTitle}>{section.name}</h2>
@@ -121,19 +214,19 @@ function HeroSection({ section, index }: { section: MenuSection; index: number }
           <p style={styles.heroNoteBody}>Any drink here can be made with the beans of your choice.</p>
         </div>
       </div>
-      <TwoColGrid items={section.items} dark />
+      <TwoColGrid items={section.items} dark getOverrides={(item) => LAB_OVERRIDES[item.name]} />
     </div>
   );
 }
 
-function NumberedSection({ section, index, icon, food }: { section: MenuSection; index: number; icon: string; food: boolean }) {
+function NumberedSection({ section, index, icon, food }: { section: MenuSection; index: number; icon: IconKey; food: boolean }) {
   return (
     <section style={styles.section}>
       <div style={styles.sectionHead}>
         <span style={styles.sectionNum}>{String(index).padStart(2, '0')}</span>
-        <h2 style={styles.sectionTitle}>{section.name}</h2>
+        <h2 style={styles.sectionTitle}>{DISPLAY_NAME[section.name] ?? section.name}</h2>
         <div style={styles.sectionRule} />
-        <span style={styles.sectionIcon}>{icon}</span>
+        <Icon name={icon} style={styles.sectionIcon} />
       </div>
       <TwoColGrid items={section.items} food={food} />
     </section>
@@ -197,21 +290,21 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
   }, [screen]);
 
   const byName = new Map(sections.map((s) => [s.name, s]));
-  const hero = config.hero ? byName.get(config.hero) : undefined;
-  const orderedNames = new Set(config.order.map((o) => o.name).concat(config.hero ? [config.hero] : []));
+  const hero = config.hero ? byName.get(config.hero.name) : undefined;
+  const orderedNames = new Set(config.order.map((o) => o.name).concat(config.hero ? [config.hero.name] : []));
   const rest = config.order.map((o) => ({ section: byName.get(o.name), icon: o.icon })).filter((r) => r.section) as {
     section: MenuSection;
-    icon: string;
+    icon: IconKey;
   }[];
   // Anything the API returns that isn't explicitly placed above still shows,
   // using a generic icon, instead of silently vanishing from the draft.
-  const extra = sections.filter((s) => !orderedNames.has(s.name)).map((s) => ({ section: s, icon: '•' }));
+  const extra = sections.filter((s) => !orderedNames.has(s.name)).map((s) => ({ section: s, icon: 'dot' as IconKey }));
   const allSections = [...rest, ...extra];
 
   return (
     <main style={styles.page}>
       <div style={styles.headerBar}>
-        <div>
+        <div style={styles.logoBadge}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo.jpg" alt="" style={styles.headerLogo} />
         </div>
@@ -226,7 +319,7 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
           <p style={styles.emptyText}>Loading…</p>
         ) : (
           <>
-            {hero && <HeroSection section={hero} index={1} />}
+            {hero && <HeroSection section={hero} index={1} tagline={config.hero!.tagline} />}
             {allSections.map((r, i) => (
               <NumberedSection
                 key={r.section.name}
@@ -236,8 +329,8 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
               />
             ))}
-            {screen === 2 && <AddOns />}
-            {screen === 2 && <GoodToKnow />}
+            <AddOns />
+            <GoodToKnow />
           </>
         )}
       </div>
@@ -271,11 +364,20 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  // The logo file has a solid white background — on the maroon header bar it
+  // needs an opaque light backing (not a color filter) to read as an
+  // intentional lockup instead of a stray white box.
+  logoBadge: {
+    backgroundColor: CREAM,
+    borderRadius: 10,
+    padding: '8px 12px',
+    display: 'inline-flex',
+    alignItems: 'center',
+  },
   headerLogo: {
-    height: 56,
+    height: 48,
     width: 'auto',
-    borderRadius: 6,
-    filter: 'brightness(0) invert(1)',
+    display: 'block',
   },
   headerRight: {
     textAlign: 'right',
@@ -395,7 +497,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionIcon: {
     fontSize: 24,
+    color: MAROON,
     opacity: 0.6,
+    flexShrink: 0,
   },
   grid: {
     display: 'flex',
