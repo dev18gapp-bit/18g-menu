@@ -330,6 +330,12 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
         </div>
       </div>
 
+      {/* Same treatment as the live menu screens: a big, low-opacity, centered
+          watermark behind the content, blended with 'multiply' so the logo's
+          white background drops out against the cream page. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/logo.jpg" alt="" style={styles.watermark} />
+
       <div style={styles.body}>
         {!loaded ? (
           <p style={styles.emptyText}>Loading…</p>
@@ -367,12 +373,26 @@ const INK = '#2A1E17';
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
+    position: 'relative',
     minHeight: '100vh',
     width: '100%',
     backgroundColor: CREAM,
     display: 'flex',
     flexDirection: 'column',
     fontFamily: 'var(--font-menu)',
+    overflow: 'hidden',
+  },
+  watermark: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '70%',
+    maxWidth: 640,
+    height: 'auto',
+    opacity: 0.1,
+    mixBlendMode: 'multiply',
+    pointerEvents: 'none',
   },
   headerBar: {
     backgroundColor: MAROON,
@@ -396,6 +416,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   body: {
+    position: 'relative',
     flex: 1,
     padding: 'clamp(24px, 4vw, 48px)',
     display: 'flex',
