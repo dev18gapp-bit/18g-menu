@@ -305,9 +305,7 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
   return (
     <main style={styles.page}>
       <div style={styles.headerBar}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/logo.jpg" alt="" style={styles.headerLogo} />
-        <div style={styles.headerRight}>
+        <div>
           <p style={styles.pageLabel}>{config.pageLabel}</p>
           <h1 style={styles.pageTitle}>{config.title}</h1>
         </div>
@@ -360,23 +358,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: MAROON,
     padding: 'clamp(20px, 3vw, 36px) clamp(24px, 4vw, 48px)',
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  // Same trick as the live menu screen's watermark: the logo file has a
-  // solid white background (not transparent), and 'multiply' makes white
-  // areas a no-op against the maroon bar while the dark mark itself stays
-  // visible — no boxed badge needed, no white square edge.
-  // Scaled to roughly match the page title's own size (same clamp range),
-  // not a small corner mark.
-  headerLogo: {
-    height: 'clamp(90px, 9vw, 150px)',
-    width: 'auto',
-    display: 'block',
-    mixBlendMode: 'multiply',
-  },
-  headerRight: {
-    textAlign: 'right',
   },
   pageLabel: {
     color: 'rgba(255,255,255,0.75)',
