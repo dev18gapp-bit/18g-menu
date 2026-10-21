@@ -94,7 +94,7 @@ export function groupByScreen(items: MenuItem[], screen: number): MenuSection[] 
 }
 
 export function formatPrice(price: number | null): string {
-  return price === null ? '—' : `$${price.toFixed(2)}`;
+  return price === null ? '—' : price.toFixed(2);
 }
 
 /**

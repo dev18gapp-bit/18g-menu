@@ -24,9 +24,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   name: {
     color: 'rgba(27,21,16,0.65)',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 19,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 20,
     fontWeight: 700,
-    letterSpacing: '2px',
+    letterSpacing: '1.5px',
   },
 };

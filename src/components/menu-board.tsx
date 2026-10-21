@@ -5,6 +5,11 @@ interface MenuBoardProps {
   sections: MenuSection[];
 }
 
+// Admin enters hot/cold price text with $ for clarity (e.g. "$6.99/$7.99"),
+// but the screen itself shows plain numbers — strip it at render time rather
+// than asking admins to type prices without the familiar $ sign.
+const noDollar = (s: string) => s.replace(/\$/g, '');
+
 function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: boolean; showIced: boolean }) {
   // Each temperature that's actually offered gets its own Size + Price pair,
   // since hot and iced versions of the same drink are often priced
@@ -43,13 +48,13 @@ function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: b
           {showHot && (
             <>
               <div style={styles.sizeCell}>{item.hotSize || '—'}</div>
-              <div style={styles.priceCell}>{item.hotSize ? item.hotPrice || '—' : ''}</div>
+              <div style={styles.priceCell}>{item.hotSize ? (item.hotPrice ? noDollar(item.hotPrice) : '—') : ''}</div>
             </>
           )}
           {showIced && (
             <>
               <div style={styles.sizeCell}>{item.coldSize || '—'}</div>
-              <div style={styles.priceCell}>{item.coldSize ? item.coldPrice || '—' : ''}</div>
+              <div style={styles.priceCell}>{item.coldSize ? (item.coldPrice ? noDollar(item.coldPrice) : '—') : ''}</div>
             </>
           )}
         </Fragment>
@@ -145,10 +150,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionTitle: {
     color: '#B87333',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 32,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 34,
     fontWeight: 700,
-    letterSpacing: '3px',
+    letterSpacing: '2px',
     textTransform: 'uppercase',
     whiteSpace: 'nowrap',
   },
@@ -165,32 +170,32 @@ const styles: Record<string, React.CSSProperties> = {
   },
   headerCell: {
     color: '#B87333',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 18,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 19,
     fontWeight: 700,
-    letterSpacing: '1.5px',
+    letterSpacing: '1px',
     textTransform: 'uppercase',
     paddingBottom: 10,
     borderBottom: '2px solid rgba(184,115,51,0.3)',
   },
   nameCell: {
     color: '#1B1510',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 28,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 30,
     fontWeight: 700,
-    letterSpacing: '0.3px',
+    letterSpacing: '0',
   },
   sizeCell: {
     color: '#1B1510',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 23,
-    fontWeight: 650,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 24,
+    fontWeight: 600,
     whiteSpace: 'nowrap',
   },
   priceCell: {
     color: '#1B1510',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 24,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 25,
     fontWeight: 700,
     fontVariantNumeric: 'tabular-nums',
     textAlign: 'right',
@@ -225,33 +230,34 @@ const styles: Record<string, React.CSSProperties> = {
   },
   itemName: {
     color: '#1B1510',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 28,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 30,
     fontWeight: 700,
-    letterSpacing: '0.3px',
+    letterSpacing: '0',
   },
   badge: {
     marginLeft: 10,
     color: '#1B1510',
-    fontSize: 18,
-    fontWeight: 650,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 19,
+    fontWeight: 600,
     letterSpacing: '0.5px',
     textTransform: 'uppercase',
   },
   itemPrice: {
     flexShrink: 0,
     color: '#1B1510',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 28,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 30,
     fontWeight: 700,
     fontVariantNumeric: 'tabular-nums',
   },
   itemDescription: {
     marginTop: 4,
     color: 'rgba(27,21,16,0.75)',
-    fontFamily: 'var(--font-raleway)',
-    fontSize: 18,
-    fontWeight: 600,
+    fontFamily: 'var(--font-menu)',
+    fontSize: 19,
+    fontWeight: 550,
     lineHeight: 1.45,
   },
 };
