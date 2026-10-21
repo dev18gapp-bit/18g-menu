@@ -304,10 +304,8 @@ export default function DraftMenuScreen({ screen }: { screen: 1 | 2 }) {
   return (
     <main style={styles.page}>
       <div style={styles.headerBar}>
-        <div style={styles.logoBadge}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo.jpg" alt="" style={styles.headerLogo} />
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/logo.jpg" alt="" style={styles.headerLogo} />
         <div style={styles.headerRight}>
           <p style={styles.pageLabel}>{config.pageLabel}</p>
           <h1 style={styles.pageTitle}>{config.title}</h1>
@@ -364,20 +362,15 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  // The logo file has a solid white background — on the maroon header bar it
-  // needs an opaque light backing (not a color filter) to read as an
-  // intentional lockup instead of a stray white box.
-  logoBadge: {
-    backgroundColor: CREAM,
-    borderRadius: 10,
-    padding: '8px 12px',
-    display: 'inline-flex',
-    alignItems: 'center',
-  },
+  // Same trick as the live menu screen's watermark: the logo file has a
+  // solid white background (not transparent), and 'multiply' makes white
+  // areas a no-op against the maroon bar while the dark mark itself stays
+  // visible — no boxed badge needed, no white square edge.
   headerLogo: {
-    height: 48,
+    height: 92,
     width: 'auto',
     display: 'block',
+    mixBlendMode: 'multiply',
   },
   headerRight: {
     textAlign: 'right',
