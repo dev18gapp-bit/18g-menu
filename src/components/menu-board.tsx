@@ -45,18 +45,24 @@ function SizeTable({ items, showHot, showIced }: { items: MenuItem[]; showHot: b
             {item.name}
             {item.description && <p style={styles.itemDescription}>{item.description}</p>}
           </div>
-          {showHot && (
-            <>
-              <div style={styles.sizeCell}>{item.hotSize || '—'}</div>
-              <div style={styles.priceCell}>{item.hotSize ? (item.hotPrice ? noDollar(item.hotPrice) : '—') : ''}</div>
-            </>
-          )}
-          {showIced && (
-            <>
-              <div style={styles.sizeCell}>{item.coldSize || '—'}</div>
-              <div style={styles.priceCell}>{item.coldSize ? (item.coldPrice ? noDollar(item.coldPrice) : '—') : ''}</div>
-            </>
-          )}
+          {showHot &&
+            (item.hotSize ? (
+              <>
+                <div style={styles.sizeCell}>{item.hotSize}</div>
+                <div style={styles.priceCell}>{item.hotPrice ? noDollar(item.hotPrice) : '—'}</div>
+              </>
+            ) : (
+              <div style={{ ...styles.unavailable, gridColumn: 'span 2' }}>Iced only</div>
+            ))}
+          {showIced &&
+            (item.coldSize ? (
+              <>
+                <div style={styles.sizeCell}>{item.coldSize}</div>
+                <div style={styles.priceCell}>{item.coldPrice ? noDollar(item.coldPrice) : '—'}</div>
+              </>
+            ) : (
+              <div style={{ ...styles.unavailable, gridColumn: 'span 2' }}>Hot only</div>
+            ))}
         </Fragment>
       ))}
     </div>
@@ -198,6 +204,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 25,
     fontWeight: 700,
     fontVariantNumeric: 'tabular-nums',
+    textAlign: 'right',
+    whiteSpace: 'nowrap',
+  },
+  // Replaces a bare "—" + blank price when an item only comes in the other
+  // temperature — a short, muted note instead of a dash floating next to
+  // empty space.
+  unavailable: {
+    color: 'rgba(27,21,16,0.4)',
+    fontFamily: 'var(--font-menu)',
+    fontSize: 17,
+    fontStyle: 'italic',
+    fontWeight: 500,
     textAlign: 'right',
     whiteSpace: 'nowrap',
   },
