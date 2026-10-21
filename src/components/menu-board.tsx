@@ -2,6 +2,8 @@ import { formatPrice, type MenuItem, type MenuSection } from '@/lib/menu-data';
 
 interface MenuBoardProps {
   sections: MenuSection[];
+  /** 1 = single list top-to-bottom, 2 = two columns side by side (default). */
+  columns?: 1 | 2;
 }
 
 function ItemCard({ item }: { item: MenuItem }) {
@@ -16,12 +18,12 @@ function ItemCard({ item }: { item: MenuItem }) {
           {item.name}
           {item.hotSize && (
             <span style={styles.emoji} title="Served hot">
-              🔥
+              ☕
             </span>
           )}
           {item.coldSize && (
             <span style={styles.emoji} title="Served iced">
-              ❄️
+              🧊
             </span>
           )}
           {!item.hotSize && !item.coldSize && item.hotIced && <span style={styles.badge}>{item.hotIced}</span>}
@@ -33,20 +35,20 @@ function ItemCard({ item }: { item: MenuItem }) {
   );
 }
 
-// Two fixed columns, filled top-to-bottom (left column first, then right) —
-// not a wrapping grid, which interleaves items left/right/left/right and
+// Fills column(s) top-to-bottom (left column first, then right, when there
+// are two) — not a wrapping grid, which interleaves items left/right and
 // breaks the reading order of a longer list.
-function TwoColumnList({ items }: { items: MenuItem[] }) {
-  const splitAt = Math.ceil(items.length / 2);
-  const columns = [items.slice(0, splitAt), items.slice(splitAt)];
+function ItemList({ items, columns }: { items: MenuItem[]; columns: 1 | 2 }) {
+  const splitAt = columns === 1 ? items.length : Math.ceil(items.length / 2);
+  const groups = columns === 1 ? [items] : [items.slice(0, splitAt), items.slice(splitAt)];
 
   return (
     <div style={styles.columns}>
-      {columns.map(
-        (column, i) =>
-          column.length > 0 && (
+      {groups.map(
+        (group, i) =>
+          group.length > 0 && (
             <div key={i} style={styles.column}>
-              {column.map((item) => (
+              {group.map((item) => (
                 <ItemCard key={item.id} item={item} />
               ))}
             </div>
@@ -56,7 +58,7 @@ function TwoColumnList({ items }: { items: MenuItem[] }) {
   );
 }
 
-export default function MenuBoard({ sections }: MenuBoardProps) {
+export default function MenuBoard({ sections, columns = 2 }: MenuBoardProps) {
   return (
     <div style={styles.board}>
       {sections.map((section) => (
@@ -66,7 +68,7 @@ export default function MenuBoard({ sections }: MenuBoardProps) {
             <div style={styles.sectionRule} />
           </div>
 
-          <TwoColumnList items={section.items} />
+          <ItemList items={section.items} columns={columns} />
         </section>
       ))}
     </div>

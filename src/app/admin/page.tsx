@@ -326,7 +326,7 @@ export default function AdminPage() {
           shown, only captured by html2canvas above. */}
       <div style={styles.exportCanvasWrap} aria-hidden="true">
         <div ref={exportRef} style={styles.exportCanvas}>
-          <MenuBoard sections={exportSections} />
+          <MenuBoard sections={exportSections} columns={screen === 1 ? 1 : 2} />
           <MenuFooter />
         </div>
       </div>
