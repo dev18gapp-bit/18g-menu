@@ -115,8 +115,26 @@ const DISPLAY_NAME: Record<string, string> = {
 // hot. Overriding here (not in the DB) keeps the live screens untouched.
 function labOverrides(item: MenuItem): { hot?: boolean; iced?: boolean; sizes?: string[] } {
   if (item.name === 'Espressotini') return { sizes: ['ONE SIZE'] };
+  if (item.name === 'Pour Over') return { hot: true, iced: false, sizes: ['ONE SIZE'] };
   if (item.name === 'Aeropress') return { hot: true, iced: false, sizes: ['M', 'L'] };
   return { sizes: ['M', 'L'] };
+}
+
+// Draft-only: "Pour Over" doesn't exist as a real menu item yet, so it's
+// injected here (not written to the DB) right after Aeropress, matching
+// the owner's reference layout without touching the live Lab Experience data.
+function withPourOver(items: MenuItem[]): MenuItem[] {
+  const aeropressIndex = items.findIndex((i) => i.name === 'Aeropress');
+  if (aeropressIndex === -1) return items;
+  const pourOver: MenuItem = {
+    ...items[aeropressIndex],
+    id: 'draft-pour-over',
+    name: 'Pour Over',
+    description: '',
+  };
+  const result = items.slice();
+  result.splice(aeropressIndex + 1, 0, pourOver);
+  return result;
 }
 
 const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
@@ -216,7 +234,7 @@ function HeroSection({ section, index, tagline }: { section: MenuSection; index:
           <p style={styles.heroNoteBody}>Any drink here can be made with the beans of your choice.</p>
         </div>
       </div>
-      <TwoColGrid items={section.items} dark getOverrides={labOverrides} />
+      <TwoColGrid items={withPourOver(section.items)} dark getOverrides={labOverrides} />
     </div>
   );
 }
