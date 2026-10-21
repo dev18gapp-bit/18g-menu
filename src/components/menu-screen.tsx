@@ -7,6 +7,8 @@ import MenuFooter from '@/components/menu-footer';
 
 const POLL_INTERVAL_MS = 120_000; // 2 min — board content rarely changes, no need to hammer the API
 
+const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
+
 export default function MenuScreen({ screen }: { screen: number }) {
   const [sections, setSections] = useState<MenuSection[]>([]);
   const [graphics, setGraphics] = useState<Record<string, string>>({});
@@ -50,6 +52,16 @@ export default function MenuScreen({ screen }: { screen: number }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/logo.jpg" alt="" style={styles.watermark} />
         <div style={styles.contentInner}>
+          {screen === 1 && (
+            <div style={styles.addOns}>
+              {ADD_ONS.map((line, i) => (
+                <span key={line} style={styles.addOnItem}>
+                  {i > 0 && <span style={styles.addOnDot}>•</span>}
+                  {line}
+                </span>
+              ))}
+            </div>
+          )}
           {loaded && sections.length === 0 ? (
             <p style={styles.emptyText}>Menu coming soon.</p>
           ) : (
@@ -121,6 +133,26 @@ const styles: Record<string, React.CSSProperties> = {
   },
   contentInner: {
     position: 'relative',
+  },
+  addOns: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '6px 10px',
+    marginBottom: 28,
+    paddingBottom: 20,
+    borderBottom: '1px dashed rgba(184,115,51,0.35)',
+  },
+  addOnItem: {
+    color: 'rgba(27,21,16,0.7)',
+    fontFamily: 'var(--font-menu)',
+    fontSize: 16,
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+  },
+  addOnDot: {
+    color: '#B87333',
+    marginRight: 10,
   },
   emptyText: {
     color: 'rgba(27,21,16,0.5)',
