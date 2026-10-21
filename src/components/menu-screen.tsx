@@ -53,7 +53,7 @@ export default function MenuScreen({ screen }: { screen: number }) {
           {loaded && sections.length === 0 ? (
             <p style={styles.emptyText}>Menu coming soon.</p>
           ) : (
-            <MenuBoard sections={sections} columns={screen === 1 ? 1 : 2} />
+            <MenuBoard sections={sections} columns={1} />
           )}
           <MenuFooter />
         </div>
