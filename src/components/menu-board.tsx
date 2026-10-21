@@ -58,6 +58,11 @@ function ItemList({ items, columns }: { items: MenuItem[]; columns: 1 | 2 }) {
   );
 }
 
+// These two run long and sit side by side on the same screen — two columns
+// fits them without running off the bottom, regardless of the screen's
+// general single/double-column setting.
+const ALWAYS_TWO_COLUMNS = new Set(['Viennoiserie', 'Patisserie']);
+
 export default function MenuBoard({ sections, columns = 2 }: MenuBoardProps) {
   return (
     <div style={styles.board}>
@@ -68,7 +73,7 @@ export default function MenuBoard({ sections, columns = 2 }: MenuBoardProps) {
             <div style={styles.sectionRule} />
           </div>
 
-          <ItemList items={section.items} columns={columns} />
+          <ItemList items={section.items} columns={ALWAYS_TWO_COLUMNS.has(section.name) ? 2 : columns} />
         </section>
       ))}
     </div>
