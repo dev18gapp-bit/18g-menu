@@ -370,8 +370,8 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
               />
             ))}
             <AddOns />
-            <GoodToKnow />
-            <ColdFoam />
+            {screen === 1 && <GoodToKnow />}
+            {screen === 1 && <ColdFoam />}
           </>
         )}
       </div>
