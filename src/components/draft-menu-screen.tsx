@@ -544,10 +544,11 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     gap: 42,
     flexWrap: 'wrap',
+    minWidth: 0,
   },
   gridCol: {
     flex: '1 1 320px',
-    minWidth: 280,
+    minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
     gap: 20,
@@ -562,17 +563,20 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 10,
   },
+  // Deliberately NOT nowrap: a long name needs to wrap to a second line
+  // instead of pushing the pills/size boxes/price off the edge of the
+  // screen — that's what was clipping corners at the larger font size.
   rowName: {
     color: INK,
     fontSize: 30,
     fontWeight: 800,
-    whiteSpace: 'nowrap',
+    minWidth: 0,
   },
   rowNameDark: {
     color: CREAM,
     fontSize: 30,
     fontWeight: 800,
-    whiteSpace: 'nowrap',
+    minWidth: 0,
   },
   pill: {
     fontSize: 15,
