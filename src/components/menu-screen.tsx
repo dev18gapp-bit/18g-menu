@@ -96,9 +96,9 @@ const SCREEN_CONFIG: Record<number, ScreenConfig> = {
       { name: 'Matcha Bar', icon: 'whisk' },
       { name: 'Chai', icon: 'tea' },
       { name: 'Refreshers', icon: 'glass' },
+      { name: 'Deli', icon: 'sandwich' },
       { name: 'Viennoiserie', icon: 'croissant' },
       { name: 'Patisserie', icon: 'cake' },
-      { name: 'Deli', icon: 'sandwich' },
     ],
   },
 };
