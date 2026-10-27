@@ -75,7 +75,7 @@ interface ScreenConfig {
   pageLabel: string;
   title: string;
   hero: { name: string; tagline: string } | null;
-  order: { name: string; icon: IconKey }[];
+  order: { name: string; icon: IconKey; tagline?: string }[];
 }
 
 const SCREEN_CONFIG: Record<number, ScreenConfig> = {
@@ -97,8 +97,8 @@ const SCREEN_CONFIG: Record<number, ScreenConfig> = {
       { name: 'Chai', icon: 'tea' },
       { name: 'Refreshers', icon: 'glass' },
       { name: 'Deli', icon: 'sandwich' },
-      { name: 'Viennoiserie', icon: 'croissant' },
-      { name: 'Patisserie', icon: 'cake' },
+      { name: 'Viennoiserie', icon: 'croissant', tagline: 'Freshly baked, ask your barista' },
+      { name: 'Patisserie', icon: 'cake', tagline: 'Ask your barista' },
     ],
   },
 };
@@ -237,7 +237,19 @@ function HeroSection({ section, index, tagline }: { section: MenuSection; index:
   );
 }
 
-function NumberedSection({ section, index, icon, food }: { section: MenuSection; index: number; icon: IconKey; food: boolean }) {
+function NumberedSection({
+  section,
+  index,
+  icon,
+  food,
+  tagline,
+}: {
+  section: MenuSection;
+  index: number;
+  icon: IconKey;
+  food: boolean;
+  tagline?: string;
+}) {
   return (
     <section style={styles.section}>
       <div style={styles.sectionHead}>
@@ -246,6 +258,7 @@ function NumberedSection({ section, index, icon, food }: { section: MenuSection;
         <div style={styles.sectionRule} />
         <Icon name={icon} style={styles.sectionIcon} />
       </div>
+      {tagline && <p style={styles.sectionTagline}>{tagline}</p>}
       <TwoColGrid items={section.items} food={food} />
     </section>
   );
@@ -331,10 +344,12 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
   // Sections configured above always render their header — even with zero
   // items (e.g. Viennoiserie/Patisserie kept as empty placeholders) —
   // instead of disappearing when there's no matching data.
-  const rest = config.order.map((o) => ({ section: byName.get(o.name) ?? { name: o.name, items: [] }, icon: o.icon }));
+  const rest = config.order.map((o) => ({ section: byName.get(o.name) ?? { name: o.name, items: [] }, icon: o.icon, tagline: o.tagline }));
   // Anything the API returns that isn't explicitly placed above still shows,
   // using a generic icon, instead of silently vanishing from the draft.
-  const extra = sections.filter((s) => !orderedNames.has(s.name)).map((s) => ({ section: s, icon: 'dot' as IconKey }));
+  const extra = sections
+    .filter((s) => !orderedNames.has(s.name))
+    .map((s) => ({ section: s, icon: 'dot' as IconKey, tagline: undefined as string | undefined }));
   const allSections = [...rest, ...extra];
 
   return (
@@ -364,6 +379,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
                 section={r.section}
                 index={i + (hero ? 2 : 1)}
                 icon={r.icon}
+                tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
               />
             ))}
@@ -537,6 +553,13 @@ const styles: Record<string, React.CSSProperties> = {
     color: MAROON,
     opacity: 0.6,
     flexShrink: 0,
+  },
+  sectionTagline: {
+    color: MAROON,
+    fontSize: 18,
+    fontStyle: 'italic',
+    fontWeight: 600,
+    margin: 0,
   },
   grid: {
     display: 'flex',
