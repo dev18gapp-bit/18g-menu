@@ -109,15 +109,13 @@ const DISPLAY_NAME: Record<string, string> = {
   'Matcha Bar': 'Ceremonial Matcha',
 };
 
-// Draft-only presentation overrides for The Lab Experience: the live data
-// has every item as iced/one-size, but this design calls for every item to
-// show M/L except Espressotini (one size), and Aeropress specifically as
-// hot. Overriding here (not in the DB) keeps the live screens untouched.
+// Presentation overrides for The Lab Experience: every item shows as one
+// size, with Aeropress and Pour Over specifically as hot (the rest stay
+// iced, inherited from the real data).
 function labOverrides(item: MenuItem): { hot?: boolean; iced?: boolean; sizes?: string[] } {
-  if (item.name === 'Espressotini') return { sizes: ['ONE SIZE'] };
   if (item.name === 'Pour Over') return { hot: true, iced: false, sizes: ['ONE SIZE'] };
-  if (item.name === 'Aeropress') return { hot: true, iced: false, sizes: ['M', 'L'] };
-  return { sizes: ['M', 'L'] };
+  if (item.name === 'Aeropress') return { hot: true, iced: false, sizes: ['ONE SIZE'] };
+  return { sizes: ['ONE SIZE'] };
 }
 
 // Draft-only: "Pour Over" doesn't exist as a real menu item yet, so it's
@@ -330,10 +328,10 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
   const byName = new Map(sections.map((s) => [s.name, s]));
   const hero = config.hero ? byName.get(config.hero.name) : undefined;
   const orderedNames = new Set(config.order.map((o) => o.name).concat(config.hero ? [config.hero.name] : []));
-  const rest = config.order.map((o) => ({ section: byName.get(o.name), icon: o.icon })).filter((r) => r.section) as {
-    section: MenuSection;
-    icon: IconKey;
-  }[];
+  // Sections configured above always render their header — even with zero
+  // items (e.g. Viennoiserie/Patisserie kept as empty placeholders) —
+  // instead of disappearing when there's no matching data.
+  const rest = config.order.map((o) => ({ section: byName.get(o.name) ?? { name: o.name, items: [] }, icon: o.icon }));
   // Anything the API returns that isn't explicitly placed above still shows,
   // using a generic icon, instead of silently vanishing from the draft.
   const extra = sections.filter((s) => !orderedNames.has(s.name)).map((s) => ({ section: s, icon: 'dot' as IconKey }));
@@ -679,13 +677,13 @@ const styles: Record<string, React.CSSProperties> = {
   chips: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 14,
+    gap: 18,
   },
   chip: {
     border: `1.5px solid rgba(42,30,23,0.4)`,
-    borderRadius: 8,
-    padding: '12px 20px',
-    fontSize: 19,
+    borderRadius: 10,
+    padding: '16px 26px',
+    fontSize: 24,
     fontWeight: 700,
     color: INK,
   },
