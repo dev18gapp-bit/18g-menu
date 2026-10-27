@@ -136,7 +136,7 @@ function withPourOver(items: MenuItem[]): MenuItem[] {
 }
 
 const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
-const COLD_FOAM = ['Vanilla', 'Banana'];
+const COLD_FOAM = ['Vanilla', 'Banana', 'Strawberry', 'Fall'];
 
 // "12/16 oz" -> ['M','L']; "8/12/16 oz" -> ['S','M','L']; "5 oz" -> ['ONE SIZE']
 function sizeLabels(value: string): string[] {
@@ -369,7 +369,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
             ))}
             <AddOns />
             {screen === 1 && <GoodToKnow />}
-            {screen === 1 && <ColdFoam />}
+            <ColdFoam />
           </>
         )}
       </div>
