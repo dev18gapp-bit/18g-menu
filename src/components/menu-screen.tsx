@@ -455,7 +455,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 'clamp(24px, 4vw, 48px)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 46,
+    gap: 34,
     maxWidth: 1200,
     width: '100%',
     marginInline: 'auto',
@@ -517,7 +517,7 @@ const styles: Record<string, React.CSSProperties> = {
   section: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 24,
+    gap: 18,
   },
   sectionHead: {
     display: 'flex',
@@ -572,12 +572,12 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 20,
+    gap: 15,
   },
   row: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: 3,
   },
   rowLine: {
     display: 'flex',
@@ -659,10 +659,11 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   rowDesc: {
-    color: 'rgba(42,30,23,0.6)',
-    fontSize: 19,
+    color: 'rgba(42,30,23,0.82)',
+    fontSize: 17,
     fontStyle: 'italic',
     margin: 0,
+    lineHeight: 1.3,
   },
   rowDescDark: {
     color: 'rgba(243,236,222,0.65)',
