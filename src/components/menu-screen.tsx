@@ -659,8 +659,9 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   rowDesc: {
-    color: 'rgba(42,30,23,0.82)',
+    color: INK,
     fontSize: 17,
+    fontWeight: 600,
     fontStyle: 'italic',
     margin: 0,
     lineHeight: 1.3,
