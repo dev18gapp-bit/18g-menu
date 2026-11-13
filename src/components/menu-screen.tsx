@@ -264,6 +264,7 @@ function NumberedSection({
       <div style={styles.sectionHead}>
         <span style={styles.sectionNum}>{String(index).padStart(2, '0')}</span>
         <h2 style={styles.sectionTitle}>{DISPLAY_NAME[section.name] ?? section.name}</h2>
+        {SIGNATURE_SECTIONS.has(section.name) && <span style={{ ...styles.pill, ...styles.pillSignature }}>SIGNATURE</span>}
         <div style={styles.sectionRule} />
         <Icon name={icon} style={styles.sectionIcon} />
       </div>
