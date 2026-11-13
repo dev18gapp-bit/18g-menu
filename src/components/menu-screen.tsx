@@ -138,6 +138,14 @@ function withPourOver(items: MenuItem[]): MenuItem[] {
 const ADD_ONS = ['Go large — $1', 'Add a double shot — $3', 'Alternative milk — $0.50', 'Add foam — $1'];
 const COLD_FOAM = ['Vanilla', 'Banana', 'Strawberry', 'Fall'];
 
+// Presentation-only "signature" badge — not stored in the DB, so the
+// marked items/sections are hardcoded here, same approach as DISPLAY_NAME.
+const SIGNATURE_ITEMS = new Set(['Salep Latte', 'Banana Bread Latte', 'Biscoff Latte', 'Mango Dragon Fruit', 'Strawberry Acai']);
+const SIGNATURE_SECTIONS = new Set(['Matcha Bar', 'The Lab Experience']);
+function isSignatureItem(item: MenuItem): boolean {
+  return SIGNATURE_ITEMS.has(item.name) || SIGNATURE_SECTIONS.has(item.section);
+}
+
 // "12/16 oz" -> ['M','L']; "8/12/16 oz" -> ['S','M','L']; "5 oz" -> ['ONE SIZE']
 function sizeLabels(value: string): string[] {
   const segments = value
@@ -158,6 +166,7 @@ function DrinkRow({ item, dark, overrides }: { item: MenuItem; dark?: boolean; o
     <div style={styles.row}>
       <div style={styles.rowLine}>
         <span style={dark ? styles.rowNameDark : styles.rowName}>{item.name}</span>
+        {isSignatureItem(item) && <span style={{ ...styles.pill, ...styles.pillSignature }}>SIGNATURE</span>}
         {showHot && <span style={{ ...styles.pill, ...styles.pillHot }}>HOT</span>}
         {showIced && <span style={{ ...styles.pill, ...styles.pillIced }}>ICED</span>}
         <span style={dark ? styles.leaderDark : styles.leader} />
@@ -402,6 +411,7 @@ const MAROON = '#8B4238';
 const MAROON_DARK = '#6E342C';
 const CREAM = '#F3ECDE';
 const INK = '#2A1E17';
+const GOLD = '#E8C77A';
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
@@ -613,6 +623,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pillIced: {
     backgroundColor: '#3A5A74',
+  },
+  pillSignature: {
+    backgroundColor: GOLD,
+    color: INK,
   },
   leader: {
     flex: 1,
