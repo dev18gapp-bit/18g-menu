@@ -141,7 +141,7 @@ const COLD_FOAM = ['Vanilla', 'Banana', 'Strawberry', 'Fall'];
 // Presentation-only "signature" badge — not stored in the DB, so the
 // marked items/sections are hardcoded here, same approach as DISPLAY_NAME.
 const SIGNATURE_ITEMS = new Set(['Salep Latte', 'Banana Bread Latte', 'Biscoff Latte', 'Mango Dragon Fruit', 'Strawberry Acai']);
-const SIGNATURE_SECTIONS = new Set(['Matcha Bar', 'The Lab Experience']);
+const SIGNATURE_SECTIONS = new Set(['Matcha Bar']);
 function isSignatureItem(item: MenuItem): boolean {
   return SIGNATURE_ITEMS.has(item.name) || SIGNATURE_SECTIONS.has(item.section);
 }
