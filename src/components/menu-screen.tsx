@@ -76,6 +76,13 @@ interface ScreenConfig {
   title: string;
   hero: { name: string; tagline: string } | null;
   order: { name: string; icon: IconKey; tagline?: string }[];
+  // Which screen's live data to fetch, when it differs from the page's own
+  // number (screen 3 mirrors screen 1's Lab Experience data, rather than
+  // needing its own duplicate rows in the DB).
+  dataScreen?: number;
+  // Render only the hero section — no other sections, Add-Ons, or
+  // Good to know / Cold foam footers.
+  heroOnly?: boolean;
 }
 
 const SCREEN_CONFIG: Record<number, ScreenConfig> = {
@@ -100,6 +107,14 @@ const SCREEN_CONFIG: Record<number, ScreenConfig> = {
       { name: 'Viennoiserie', icon: 'croissant', tagline: 'Freshly baked, ask your barista' },
       { name: 'Patisserie', icon: 'cake', tagline: 'Ask your barista' },
     ],
+  },
+  3: {
+    pageLabel: 'FEATURED MENU',
+    title: 'THE LAB EXPERIENCE',
+    hero: { name: 'The Lab Experience', tagline: 'FEATURED · SLOW BREWS, ESPRESSO & MATCHA' },
+    order: [],
+    dataScreen: 1,
+    heroOnly: true,
   },
 };
 
@@ -326,17 +341,18 @@ function ColdFoam() {
   );
 }
 
-export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
+export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
   const [sections, setSections] = useState<MenuSection[]>([]);
   const [loaded, setLoaded] = useState(false);
   const config = SCREEN_CONFIG[screen];
+  const dataScreen = config.dataScreen ?? screen;
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       const items = await fetchMenu();
       if (!cancelled) {
-        setSections(groupByScreen(items, screen));
+        setSections(groupByScreen(items, dataScreen));
         setLoaded(true);
       }
     }
@@ -346,7 +362,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [screen]);
+  }, [dataScreen]);
 
   const byName = new Map(sections.map((s) => [s.name, s]));
   const hero = config.hero ? byName.get(config.hero.name) : undefined;
@@ -360,7 +376,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
   const extra = sections
     .filter((s) => !orderedNames.has(s.name))
     .map((s) => ({ section: s, icon: 'dot' as IconKey, tagline: undefined as string | undefined }));
-  const allSections = [...rest, ...extra];
+  const allSections = config.heroOnly ? [] : [...rest, ...extra];
 
   return (
     <main style={styles.page}>
@@ -393,7 +409,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 }) {
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
               />
             ))}
-            <AddOns />
+            {!config.heroOnly && <AddOns />}
             {screen === 1 && <GoodToKnow />}
             {screen === 2 && <ColdFoam />}
           </>
