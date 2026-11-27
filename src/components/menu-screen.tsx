@@ -477,7 +477,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
                 icon={r.icon}
                 tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
-                scale={screen === 1 ? 1.3 : undefined}
+                scale={screen === 1 ? 1.15 : undefined}
               />
             ))}
             {!config.heroOnly && <AddOns />}
