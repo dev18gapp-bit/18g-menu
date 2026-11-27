@@ -544,7 +544,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
 
   return (
     <main style={styles.page} ref={mainRef}>
-      <div style={enlarged ? { ...styles.headerBar, backgroundColor: LAB_BG } : styles.headerBar}>
+      <div style={enlarged || screen === 3 ? { ...styles.headerBar, backgroundColor: LAB_BG } : styles.headerBar}>
         <div>
           <p style={styles.pageLabel}>{config.pageLabel}</p>
           <h1 style={styles.pageTitle}>{config.title}</h1>
