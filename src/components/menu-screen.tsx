@@ -177,14 +177,57 @@ function sizeLabels(value: string): string[] {
   return ['S', 'M', 'L'];
 }
 
-function DrinkRow({ item, dark, overrides }: { item: MenuItem; dark?: boolean; overrides?: { hot?: boolean; iced?: boolean; sizes?: string[] } }) {
+// Scales up the ceiling (the 3rd, viewport-width-capped value) of every
+// clamp() in a style object, leaving the mobile-facing min/slope alone —
+// used to give screen 1's item rows extra size now that removing the Lab
+// Experience list freed up room on the 55in TV, without touching how the
+// same styles render on phones or on other screens.
+function scaleClamps(value: string, factor: number): string {
+  return value.replace(/clamp\(([^,]+),([^,]+),([^)]+)\)/g, (_match, min, pref, max) => {
+    const trimmedMax = (max as string).trim();
+    const num = parseFloat(trimmedMax);
+    if (Number.isNaN(num)) return `clamp(${min},${pref},${max})`;
+    const unit = trimmedMax.replace(/^-?[\d.]+/, '');
+    const newMax = Math.round(num * factor * 100) / 100;
+    return `clamp(${min},${pref},${newMax}${unit})`;
+  });
+}
+
+function scaleStyle(style: React.CSSProperties, factor?: number): React.CSSProperties {
+  if (!factor) return style;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(style)) {
+    if (typeof value === 'string') out[key] = scaleClamps(value, factor);
+    else if (typeof value === 'number' && key !== 'fontWeight') out[key] = Math.round(value * factor * 100) / 100;
+    else out[key] = value;
+  }
+  return out as React.CSSProperties;
+}
+
+function DrinkRow({
+  item,
+  dark,
+  overrides,
+  scale,
+}: {
+  item: MenuItem;
+  dark?: boolean;
+  overrides?: { hot?: boolean; iced?: boolean; sizes?: string[] };
+  scale?: number;
+}) {
   const showHot = overrides?.hot ?? Boolean(item.hotSize);
   const showIced = overrides?.iced ?? Boolean(item.coldSize);
   const sizes = overrides?.sizes ?? sizeLabels(item.hotSize || item.coldSize);
+  // When scaled up (screen 1), let the row wrap trailing badges/price to a
+  // second line instead of squeezing the name below its narrowest word —
+  // the combination of a bigger name font plus a SIGNATURE badge otherwise
+  // has nowhere near enough room to keep everything on one line.
+  const nameStyle = { ...scaleStyle(dark ? styles.rowNameDark : styles.rowName, scale), ...(scale ? { minWidth: 'min-content' as const } : {}) };
+  const lineStyle = { ...scaleStyle(styles.rowLine, scale), ...(scale ? { flexWrap: 'wrap' as const } : {}) };
   return (
-    <div style={styles.row}>
-      <div style={styles.rowLine}>
-        <span style={dark ? styles.rowNameDark : styles.rowName}>{item.name}</span>
+    <div style={scaleStyle(styles.row, scale)}>
+      <div style={lineStyle}>
+        <span style={nameStyle}>{item.name}</span>
         {isSignatureItem(item) && <span style={{ ...styles.pill, ...styles.pillSignature }}>SIGNATURE</span>}
         {showHot && <span style={{ ...styles.pill, ...styles.pillHot }}>HOT</span>}
         {showIced && <span style={{ ...styles.pill, ...styles.pillIced }}>ICED</span>}
@@ -194,22 +237,22 @@ function DrinkRow({ item, dark, overrides }: { item: MenuItem; dark?: boolean; o
             {s}
           </span>
         ))}
-        <span style={dark ? styles.rowPriceDark : styles.rowPrice}>{formatPrice(item.price)}</span>
+        <span style={scaleStyle(dark ? styles.rowPriceDark : styles.rowPrice, scale)}>{formatPrice(item.price)}</span>
       </div>
-      {item.description && <p style={dark ? styles.rowDescDark : styles.rowDesc}>{item.description}</p>}
+      {item.description && <p style={scaleStyle(dark ? styles.rowDescDark : styles.rowDesc, scale)}>{item.description}</p>}
     </div>
   );
 }
 
-function FoodRow({ item, dark }: { item: MenuItem; dark?: boolean }) {
+function FoodRow({ item, dark, scale }: { item: MenuItem; dark?: boolean; scale?: number }) {
   return (
-    <div style={styles.row}>
-      <div style={styles.rowLine}>
-        <span style={dark ? styles.rowNameDark : styles.rowName}>{item.name}</span>
+    <div style={scaleStyle(styles.row, scale)}>
+      <div style={scaleStyle(styles.rowLine, scale)}>
+        <span style={scaleStyle(dark ? styles.rowNameDark : styles.rowName, scale)}>{item.name}</span>
         <span style={dark ? styles.leaderDark : styles.leader} />
-        <span style={dark ? styles.rowPriceDark : styles.rowPrice}>{formatPrice(item.price)}</span>
+        <span style={scaleStyle(dark ? styles.rowPriceDark : styles.rowPrice, scale)}>{formatPrice(item.price)}</span>
       </div>
-      {item.description && <p style={dark ? styles.rowDescDark : styles.rowDesc}>{item.description}</p>}
+      {item.description && <p style={scaleStyle(dark ? styles.rowDescDark : styles.rowDesc, scale)}>{item.description}</p>}
     </div>
   );
 }
@@ -219,11 +262,13 @@ function TwoColGrid({
   food,
   dark,
   getOverrides,
+  scale,
 }: {
   items: MenuItem[];
   food?: boolean;
   dark?: boolean;
   getOverrides?: (item: MenuItem) => { hot?: boolean; iced?: boolean; sizes?: string[] } | undefined;
+  scale?: number;
 }) {
   const splitAt = Math.ceil(items.length / 2);
   const cols = [items.slice(0, splitAt), items.slice(splitAt)];
@@ -232,12 +277,12 @@ function TwoColGrid({
       {cols.map(
         (col, i) =>
           col.length > 0 && (
-            <div key={i} style={styles.gridCol}>
+            <div key={i} style={scaleStyle(styles.gridCol, scale)}>
               {col.map((item) =>
                 food ? (
-                  <FoodRow key={item.id} item={item} dark={dark} />
+                  <FoodRow key={item.id} item={item} dark={dark} scale={scale} />
                 ) : (
-                  <DrinkRow key={item.id} item={item} dark={dark} overrides={getOverrides?.(item)} />
+                  <DrinkRow key={item.id} item={item} dark={dark} overrides={getOverrides?.(item)} scale={scale} />
                 )
               )}
             </div>
@@ -290,12 +335,14 @@ function NumberedSection({
   icon,
   food,
   tagline,
+  scale,
 }: {
   section: MenuSection;
   index: number;
   icon: IconKey;
   food: boolean;
   tagline?: string;
+  scale?: number;
 }) {
   return (
     <section style={styles.section}>
@@ -307,7 +354,7 @@ function NumberedSection({
         <Icon name={icon} style={styles.sectionIcon} />
       </div>
       {tagline && <p style={styles.sectionTagline}>{tagline}</p>}
-      <TwoColGrid items={section.items} food={food} />
+      <TwoColGrid items={section.items} food={food} scale={scale} />
     </section>
   );
 }
@@ -430,6 +477,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
                 icon={r.icon}
                 tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
+                scale={screen === 1 ? 1.2 : undefined}
               />
             ))}
             {!config.heroOnly && <AddOns />}
@@ -663,12 +711,14 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 'clamp(16px, 4.2vw, 30px)',
     fontWeight: 800,
     minWidth: 0,
+    overflowWrap: 'anywhere',
   },
   rowNameDark: {
     color: CREAM,
     fontSize: 'clamp(16px, 4.2vw, 30px)',
     fontWeight: 800,
     minWidth: 0,
+    overflowWrap: 'anywhere',
   },
   pill: {
     fontSize: 'clamp(10px, 2.2vw, 15px)',
