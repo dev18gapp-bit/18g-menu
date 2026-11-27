@@ -76,6 +76,9 @@ interface ScreenConfig {
   title: string;
   hero: { name: string; tagline: string } | null;
   order: { name: string; icon: IconKey; tagline?: string }[];
+  // When set, the hero shows this one generic price instead of listing
+  // individual items (screen 1 points here to screen 3 for the full list).
+  heroPrice?: number;
   // Which screen's live data to fetch, when it differs from the page's own
   // number (screen 3 mirrors screen 1's Lab Experience data, rather than
   // needing its own duplicate rows in the DB).
@@ -90,6 +93,7 @@ const SCREEN_CONFIG: Record<number, ScreenConfig> = {
     pageLabel: 'MENU — 01 / 02',
     title: 'COFFEE',
     hero: { name: 'The Lab Experience', tagline: 'FEATURED · SLOW BREWS, ESPRESSO & MATCHA' },
+    heroPrice: 9.45,
     order: [
       { name: 'Classic', icon: 'cup' },
       { name: 'Speciality Espresso', icon: 'pitcher' },
@@ -243,7 +247,20 @@ function TwoColGrid({
   );
 }
 
-function HeroSection({ section, index, tagline }: { section: MenuSection; index: number; tagline: string }) {
+function HeroSection({
+  section,
+  index,
+  tagline,
+  price,
+}: {
+  section: MenuSection;
+  index: number;
+  tagline: string;
+  // When set, the hero shows a single generic price instead of listing
+  // individual items — used on screen 1, where the Lab Experience has
+  // moved to its own dedicated screen-3 display.
+  price?: number;
+}) {
   return (
     <div style={styles.hero}>
       <p style={styles.heroKicker}>
@@ -255,8 +272,14 @@ function HeroSection({ section, index, tagline }: { section: MenuSection; index:
           <p style={styles.heroNoteTitle}>Choose your beans</p>
           <p style={styles.heroNoteBody}>Any drink here can be made with the beans of your choice.</p>
         </div>
+        {price !== undefined && (
+          <div style={styles.heroPrice}>
+            <p style={styles.heroPriceLabel}>Starting at</p>
+            <p style={styles.heroPriceValue}>{formatPrice(price)}</p>
+          </div>
+        )}
       </div>
-      <TwoColGrid items={withPourOver(section.items)} dark getOverrides={labOverrides} />
+      {price === undefined && <TwoColGrid items={withPourOver(section.items)} dark getOverrides={labOverrides} />}
     </div>
   );
 }
@@ -398,7 +421,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
           <p style={styles.emptyText}>Loading…</p>
         ) : (
           <>
-            {hero && <HeroSection section={hero} index={1} tagline={config.hero!.tagline} />}
+            {hero && <HeroSection section={hero} index={1} tagline={config.hero!.tagline} price={config.heroPrice} />}
             {allSections.map((r, i) => (
               <NumberedSection
                 key={r.section.name}
@@ -539,6 +562,27 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(243,236,222,0.8)',
     fontSize: 'clamp(12px, 2.4vw, 17px)',
     lineHeight: 1.4,
+    margin: 0,
+  },
+  heroPrice: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  heroPriceLabel: {
+    color: 'rgba(243,236,222,0.6)',
+    fontSize: 'clamp(11px, 2.2vw, 15px)',
+    fontWeight: 700,
+    letterSpacing: '1.5px',
+    textTransform: 'uppercase',
+    margin: 0,
+  },
+  heroPriceValue: {
+    color: '#E0A84E',
+    fontSize: 'clamp(28px, 6vw, 52px)',
+    fontWeight: 800,
+    fontVariantNumeric: 'tabular-nums',
     margin: 0,
   },
   section: {
