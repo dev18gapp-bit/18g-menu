@@ -269,7 +269,7 @@ function HeroSection({
       <div style={styles.heroHead}>
         <h2 style={styles.heroTitle}>{section.name}</h2>
         <div style={styles.heroNote}>
-          <p style={styles.heroNoteTitle}>Choose your beans</p>
+          <p style={styles.heroNoteTitle}>Choose your drink</p>
           <p style={styles.heroNoteBody}>Any drink here can be made with the beans of your choice.</p>
         </div>
         {price !== undefined && (
