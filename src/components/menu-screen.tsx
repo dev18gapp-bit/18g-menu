@@ -263,12 +263,17 @@ function TwoColGrid({
   dark,
   getOverrides,
   scale,
+  vGap,
 }: {
   items: MenuItem[];
   food?: boolean;
   dark?: boolean;
   getOverrides?: (item: MenuItem) => { hot?: boolean; iced?: boolean; sizes?: string[] } | undefined;
   scale?: number;
+  // Vertical space between items — independent of `scale`, which only
+  // governs font size and must stay driven by the horizontal fit
+  // measurement, not by how much empty space happens to be left below.
+  vGap?: number;
 }) {
   const splitAt = Math.ceil(items.length / 2);
   const cols = [items.slice(0, splitAt), items.slice(splitAt)];
@@ -277,7 +282,7 @@ function TwoColGrid({
       {cols.map(
         (col, i) =>
           col.length > 0 && (
-            <div key={i} style={scaleStyle(styles.gridCol, scale)}>
+            <div key={i} style={{ ...scaleStyle(styles.gridCol, scale), ...(vGap !== undefined ? { gap: vGap } : {}) }}>
               {col.map((item) =>
                 food ? (
                   <FoodRow key={item.id} item={item} dark={dark} scale={scale} />
@@ -336,6 +341,7 @@ function NumberedSection({
   food,
   tagline,
   scale,
+  vGap,
 }: {
   section: MenuSection;
   index: number;
@@ -343,6 +349,7 @@ function NumberedSection({
   food: boolean;
   tagline?: string;
   scale?: number;
+  vGap?: number;
 }) {
   return (
     <section style={styles.section}>
@@ -354,7 +361,7 @@ function NumberedSection({
         <Icon name={icon} style={styles.sectionIcon} />
       </div>
       {tagline && <p style={styles.sectionTagline}>{tagline}</p>}
-      <TwoColGrid items={section.items} food={food} scale={scale} />
+      <TwoColGrid items={section.items} food={food} scale={scale} vGap={vGap} />
     </section>
   );
 }
@@ -544,7 +551,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/logo.jpg" alt="" style={styles.watermark} />
 
-      <div style={screen === 1 ? { ...styles.body, maxWidth: 1700 } : styles.body}>
+      <div style={screen === 1 ? { ...styles.body, maxWidth: 1700, gap: 50 } : styles.body}>
         {!loaded ? (
           <p style={styles.emptyText}>Loading…</p>
         ) : (
@@ -559,6 +566,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
                 tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
                 scale={screen === 1 && itemScale > 1 ? itemScale : undefined}
+                vGap={screen === 1 ? 30 : undefined}
               />
             ))}
             {!config.heroOnly && <AddOns />}
