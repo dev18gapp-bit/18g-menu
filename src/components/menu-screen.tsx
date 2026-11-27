@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { fetchMenu, formatPrice, groupByScreen, type MenuItem, type MenuSection } from '@/lib/menu-data';
 
 const POLL_INTERVAL_MS = 120_000;
@@ -411,9 +411,60 @@ function ColdFoam() {
   );
 }
 
+// Screen 1's Classic/Speciality Espresso rows get enlarged to use the room
+// freed up by moving the Lab Experience list to screen 3 — but CSS clamp()
+// alone can't target "only when there's room to spare": its ceiling is flat
+// for any width past ~714px, so a flat scale factor that fits a 1920px TV
+// wraps badges onto a second line on a narrower laptop or a TV whose real
+// browser viewport isn't quite 1920. Instead of guessing a breakpoint, this
+// measures the actual rendered row widths right after the unscaled content
+// first mounts and solves for the largest scale that still keeps every
+// row's badges and price on one line, with a safety margin for
+// cross-device font-rendering differences. It recomputes on resize so it
+// keeps adapting if the kiosk window or a browser's zoom level changes.
+const MIN_ITEM_SCALE = 1;
+const MAX_ITEM_SCALE = 1.3;
+const ITEM_SCALE_SAFETY_MARGIN = 0.92;
+
+function computeItemScale(root: HTMLElement): number | null {
+  const sections = root.querySelectorAll('section');
+  let minFactor = Infinity;
+  sections.forEach((sec) => {
+    const grid = sec.children[1];
+    if (!grid) return;
+    Array.from(grid.children).forEach((col) => {
+      Array.from(col.children).forEach((row) => {
+        const line = row.children[0] as HTMLElement | undefined;
+        if (!line || line.children.length < 2) return;
+        const children = Array.from(line.children) as HTMLElement[];
+        const nameEl = children[0];
+        const priceEl = children[children.length - 1];
+        const scalablePortion = nameEl.getBoundingClientRect().width + priceEl.getBoundingClientRect().width;
+        if (scalablePortion <= 0) return;
+        // Everything between name and price except the flexible dotted
+        // leader (the only empty-text child) has a fixed width we don't
+        // scale, so it comes straight out of the budget available to grow
+        // the name/price into.
+        const fixed = children
+          .slice(1, -1)
+          .filter((c) => (c.textContent ?? '').trim() !== '')
+          .reduce((sum, c) => sum + c.getBoundingClientRect().width, 0);
+        const gapPx = parseFloat(getComputedStyle(line).columnGap || getComputedStyle(line).gap || '0');
+        const available = line.getBoundingClientRect().width - fixed - gapPx * (children.length - 1);
+        const factor = available / scalablePortion;
+        if (factor < minFactor) minFactor = factor;
+      });
+    });
+  });
+  if (!Number.isFinite(minFactor)) return null;
+  return Math.max(MIN_ITEM_SCALE, Math.min(MAX_ITEM_SCALE, minFactor * ITEM_SCALE_SAFETY_MARGIN));
+}
+
 export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
   const [sections, setSections] = useState<MenuSection[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [itemScale, setItemScale] = useState(1);
+  const mainRef = useRef<HTMLElement>(null);
   const config = SCREEN_CONFIG[screen];
   const dataScreen = config.dataScreen ?? screen;
 
@@ -434,6 +485,36 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
     };
   }, [dataScreen]);
 
+  useLayoutEffect(() => {
+    if (screen !== 1 || !loaded) return;
+    const root = mainRef.current;
+    if (!root) return;
+    // The DOM is already laid out at the baseline (unscaled) size here, so
+    // this measures real glyph widths synchronously before the browser
+    // paints — no flicker on load.
+    const initial = computeItemScale(root);
+    if (initial !== null) setItemScale(initial);
+
+    // A real kiosk display never resizes, but fall back to baseline and
+    // remeasure a frame later if the window ever does (e.g. during local
+    // testing), so the next measurement reflects actual widths rather than
+    // compounding an earlier guess.
+    let raf = 0;
+    const onResize = () => {
+      setItemScale(1);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const next = computeItemScale(root);
+        if (next !== null) setItemScale(next);
+      });
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [screen, loaded]);
+
   const byName = new Map(sections.map((s) => [s.name, s]));
   const hero = config.hero ? byName.get(config.hero.name) : undefined;
   const orderedNames = new Set(config.order.map((o) => o.name).concat(config.hero ? [config.hero.name] : []));
@@ -449,7 +530,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
   const allSections = config.heroOnly ? [] : [...rest, ...extra];
 
   return (
-    <main style={styles.page}>
+    <main style={styles.page} ref={mainRef}>
       <div style={screen === 1 ? { ...styles.headerBar, backgroundColor: LAB_BG } : styles.headerBar}>
         <div>
           <p style={styles.pageLabel}>{config.pageLabel}</p>
@@ -477,7 +558,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
                 icon={r.icon}
                 tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
-                scale={screen === 1 ? 1.15 : undefined}
+                scale={screen === 1 && itemScale > 1 ? itemScale : undefined}
               />
             ))}
             {!config.heroOnly && <AddOns />}
