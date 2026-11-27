@@ -450,7 +450,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
 
   return (
     <main style={styles.page}>
-      <div style={styles.headerBar}>
+      <div style={screen === 1 ? { ...styles.headerBar, backgroundColor: LAB_BG } : styles.headerBar}>
         <div>
           <p style={styles.pageLabel}>{config.pageLabel}</p>
           <h1 style={styles.pageTitle}>{config.title}</h1>
@@ -463,7 +463,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/logo.jpg" alt="" style={styles.watermark} />
 
-      <div style={styles.body}>
+      <div style={screen === 1 ? { ...styles.body, maxWidth: 1700 } : styles.body}>
         {!loaded ? (
           <p style={styles.emptyText}>Loading…</p>
         ) : (
@@ -477,7 +477,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
                 icon={r.icon}
                 tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
-                scale={screen === 1 ? 1.2 : undefined}
+                scale={screen === 1 ? 1.3 : undefined}
               />
             ))}
             {!config.heroOnly && <AddOns />}
@@ -500,6 +500,7 @@ const MAROON_DARK = '#6E342C';
 const CREAM = '#F3ECDE';
 const INK = '#2A1E17';
 const GOLD = '#E8C77A';
+const LAB_BG = '#3A281F';
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
@@ -563,7 +564,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 28,
   },
   hero: {
-    backgroundColor: '#3A281F',
+    backgroundColor: LAB_BG,
     borderRadius: 14,
     border: `1px solid rgba(243,236,222,0.25)`,
     padding: 'clamp(20px, 3vw, 36px)',
