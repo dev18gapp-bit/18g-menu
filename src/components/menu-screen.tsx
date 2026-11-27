@@ -245,10 +245,12 @@ function DrinkRow({
 }
 
 function FoodRow({ item, dark, scale }: { item: MenuItem; dark?: boolean; scale?: number }) {
+  const nameStyle = { ...scaleStyle(dark ? styles.rowNameDark : styles.rowName, scale), ...(scale ? { minWidth: 'min-content' as const } : {}) };
+  const lineStyle = { ...scaleStyle(styles.rowLine, scale), ...(scale ? { flexWrap: 'wrap' as const } : {}) };
   return (
     <div style={scaleStyle(styles.row, scale)}>
-      <div style={scaleStyle(styles.rowLine, scale)}>
-        <span style={scaleStyle(dark ? styles.rowNameDark : styles.rowName, scale)}>{item.name}</span>
+      <div style={lineStyle}>
+        <span style={nameStyle}>{item.name}</span>
         <span style={dark ? styles.leaderDark : styles.leader} />
         <span style={scaleStyle(dark ? styles.rowPriceDark : styles.rowPrice, scale)}>{formatPrice(item.price)}</span>
       </div>
@@ -474,6 +476,10 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
   const mainRef = useRef<HTMLElement>(null);
   const config = SCREEN_CONFIG[screen];
   const dataScreen = config.dataScreen ?? screen;
+  // Screens 1 and 2 both get the larger, more spaced-out item rows and the
+  // Lab Experience dark-brown header; screen 3 (the dedicated Lab
+  // Experience display) is left as it was.
+  const enlarged = screen === 1 || screen === 2;
 
   useEffect(() => {
     let cancelled = false;
@@ -493,7 +499,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
   }, [dataScreen]);
 
   useLayoutEffect(() => {
-    if (screen !== 1 || !loaded) return;
+    if (!enlarged || !loaded) return;
     const root = mainRef.current;
     if (!root) return;
     // The DOM is already laid out at the baseline (unscaled) size here, so
@@ -538,7 +544,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
 
   return (
     <main style={styles.page} ref={mainRef}>
-      <div style={screen === 1 ? { ...styles.headerBar, backgroundColor: LAB_BG } : styles.headerBar}>
+      <div style={enlarged ? { ...styles.headerBar, backgroundColor: LAB_BG } : styles.headerBar}>
         <div>
           <p style={styles.pageLabel}>{config.pageLabel}</p>
           <h1 style={styles.pageTitle}>{config.title}</h1>
@@ -551,7 +557,7 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/logo.jpg" alt="" style={styles.watermark} />
 
-      <div style={screen === 1 ? { ...styles.body, maxWidth: 1700, gap: 50 } : styles.body}>
+      <div style={enlarged ? { ...styles.body, maxWidth: 1700, gap: 50 } : styles.body}>
         {!loaded ? (
           <p style={styles.emptyText}>Loading…</p>
         ) : (
@@ -565,8 +571,8 @@ export default function MenuScreen({ screen }: { screen: 1 | 2 | 3 }) {
                 icon={r.icon}
                 tagline={r.tagline}
                 food={!r.section.items.some((it) => it.hotSize || it.coldSize)}
-                scale={screen === 1 && itemScale > 1 ? itemScale : undefined}
-                vGap={screen === 1 ? 30 : undefined}
+                scale={enlarged && itemScale > 1 ? itemScale : undefined}
+                vGap={enlarged ? 30 : undefined}
               />
             ))}
             {!config.heroOnly && <AddOns />}
@@ -740,7 +746,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   sectionTitle: {
-    backgroundColor: MAROON,
+    backgroundColor: LAB_BG,
     color: '#fff',
     fontSize: 'clamp(15px, 3.6vw, 26px)',
     fontWeight: 800,
